@@ -21,5 +21,6 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
         <h3><?= $project["title"] ?></h3>
         <p><?= $project["description"] ?></p>
+        <a href="edit.php?id=<?= $project["id"] ?>">Edit</a>
     </div>
 <?php endforeach; ?>

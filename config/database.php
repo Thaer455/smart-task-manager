@@ -14,7 +14,6 @@ try {
 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    echo "DB OK 🚀";
 
 } catch (PDOException $e) {
     die("Fehler: " . $e->getMessage());
