@@ -37,8 +37,31 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <br><br>
 
-    <strong>Status:</strong>
-    <?= $task["status"] ?>
+<form action="update_status.php" method="POST">
+
+    <input type="hidden" name="task_id"
+           value="<?= $task["id"] ?>">
+
+    <select name="status" onchange="this.form.submit()">
+
+        <option value="todo"
+            <?= $task["status"] == "todo" ? "selected" : "" ?>>
+            Todo
+        </option>
+
+        <option value="progress"
+            <?= $task["status"] == "progress" ? "selected" : "" ?>>
+            In Progress
+        </option>
+
+        <option value="done"
+            <?= $task["status"] == "done" ? "selected" : "" ?>>
+            Done
+        </option>
+
+    </select>
+
+</form>
 
 </div>
 
