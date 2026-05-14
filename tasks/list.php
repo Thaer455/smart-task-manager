@@ -63,6 +63,18 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 </form>
 
+<br><br>
+
+<a href="edit.php?id=<?= $task["id"] ?>">
+    Edit
+</a>
+
+|
+
+<a href="delete.php?id=<?= $task["id"] ?>">
+    Delete
+</a>
+
 </div>
 
 <?php endforeach; ?>
