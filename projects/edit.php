@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 require "../config/database.php";
 
@@ -8,41 +7,100 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
-// ID holen
+require "../includes/header.php";
+require "../includes/sidebar.php";
+
 $id = $_GET["id"];
 
-// Projekt laden
 $sql = "SELECT * FROM projects WHERE id = ?";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$id]);
+
 $project = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Wenn nicht gefunden
 if (!$project) {
     die("Project not found");
 }
 
-// Update verarbeiten
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $title = $_POST["title"];
     $description = $_POST["description"];
 
-    $sql = "UPDATE projects SET title = ?, description = ? WHERE id = ?";
+    $sql = "UPDATE projects
+            SET title = ?, description = ?
+            WHERE id = ?";
+
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$title, $description, $id]);
+
+    $stmt->execute([
+        $title,
+        $description,
+        $id
+    ]);
 
     header("Location: list.php");
     exit();
 }
 ?>
 
-<h2>Edit Project</h2>
+<div class="content">
 
-<form method="POST">
-    <input type="text" name="title" value="<?= $project["title"] ?>" required><br><br>
+    <div class="container py-5">
 
-    <textarea name="description"><?= $project["description"] ?></textarea><br><br>
+        <div class="card shadow-sm border-0">
 
-    <button type="submit">Update Project</button>
-</form>
+            <div class="card-body">
+
+                <h1 class="fw-bold mb-4">
+                    Projekt bearbeiten
+                </h1>
+
+                <form method="POST">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Titel
+                        </label>
+
+                        <input
+                            type="text"
+                            name="title"
+                            class="form-control"
+                            value="<?= $project["title"] ?>"
+                            required>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Beschreibung
+                        </label>
+
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="5"><?= $project["description"] ?></textarea>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-success">
+
+                        Projekt aktualisieren
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<?php require "../includes/footer.php"; ?>

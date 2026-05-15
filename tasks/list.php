@@ -7,6 +7,9 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
+require "../includes/header.php";
+require "../includes/sidebar.php";
+
 $sql = "
 SELECT tasks.*, projects.title AS project_title
 FROM tasks
@@ -18,63 +21,94 @@ $stmt = $pdo->query($sql);
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<h2>Tasks</h2>
+<div class="content">
 
-<a href="create.php">+ Neue Task</a>
+    <div class="container py-5">
 
-<br><br>
+        <div class="d-flex justify-content-between align-items-center mb-4">
 
-<?php foreach ($tasks as $task): ?>
+            <h1 class="fw-bold">
+                Tasks
+            </h1>
 
-<div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+            <a href="create.php" class="btn btn-primary">
+                + Neue Task
+            </a>
 
-    <h3><?= $task["title"] ?></h3>
+        </div>
 
-    <p><?= $task["description"] ?></p>
+        <?php foreach ($tasks as $task): ?>
 
-    <strong>Projekt:</strong>
-    <?= $task["project_title"] ?>
+            <div class="card shadow-sm border-0 mb-3">
 
-    <br><br>
+                <div class="card-body">
 
-<form action="update_status.php" method="POST">
+                    <h3 class="fw-bold">
+                        <?= $task["title"] ?>
+                    </h3>
 
-    <input type="hidden" name="task_id"
-           value="<?= $task["id"] ?>">
+                    <p class="text-muted">
+                        <?= $task["description"] ?>
+                    </p>
 
-    <select name="status" onchange="this.form.submit()">
+                    <p>
+                        <strong>Projekt:</strong>
+                        <?= $task["project_title"] ?>
+                    </p>
 
-        <option value="todo"
-            <?= $task["status"] == "todo" ? "selected" : "" ?>>
-            Todo
-        </option>
+                    <form action="update_status.php" method="POST">
 
-        <option value="progress"
-            <?= $task["status"] == "progress" ? "selected" : "" ?>>
-            In Progress
-        </option>
+                        <input
+                            type="hidden"
+                            name="task_id"
+                            value="<?= $task["id"] ?>">
 
-        <option value="done"
-            <?= $task["status"] == "done" ? "selected" : "" ?>>
-            Done
-        </option>
+                        <select
+                            name="status"
+                            class="form-select w-25 mb-3"
+                            onchange="this.form.submit()">
 
-    </select>
+                            <option value="todo"
+                                <?= $task["status"] == "todo" ? "selected" : "" ?>>
+                                Todo
+                            </option>
 
-</form>
+                            <option value="progress"
+                                <?= $task["status"] == "progress" ? "selected" : "" ?>>
+                                In Progress
+                            </option>
 
-<br><br>
+                            <option value="done"
+                                <?= $task["status"] == "done" ? "selected" : "" ?>>
+                                Done
+                            </option>
 
-<a href="edit.php?id=<?= $task["id"] ?>">
-    Edit
-</a>
+                        </select>
 
-|
+                    </form>
 
-<a href="delete.php?id=<?= $task["id"] ?>">
-    Delete
-</a>
+                    <a
+                        href="edit.php?id=<?= $task["id"] ?>"
+                        class="btn btn-warning btn-sm">
+
+                        Edit
+                    </a>
+
+                    <a
+                        href="delete.php?id=<?= $task["id"] ?>"
+                        class="btn btn-danger btn-sm">
+
+                        Delete
+                    </a>
+
+                </div>
+
+            </div>
+
+        <?php endforeach; ?>
+
+    </div>
 
 </div>
 
-<?php endforeach; ?>
+<?php require "../includes/footer.php"; ?>

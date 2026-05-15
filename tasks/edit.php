@@ -7,6 +7,9 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
+require "../includes/header.php";
+require "../includes/sidebar.php";
+
 $id = $_GET["id"];
 
 // Task laden
@@ -24,7 +27,7 @@ if (!$task) {
 $stmt = $pdo->query("SELECT * FROM projects");
 $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Update speichern
+// Update
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $project_id = $_POST["project_id"];
@@ -53,59 +56,118 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 ?>
 
-<h2>Edit Task</h2>
+<div class="content">
 
-<form method="POST">
+    <div class="container py-5">
 
-    <select name="project_id">
+        <div class="card shadow-sm border-0">
 
-        <?php foreach ($projects as $project): ?>
+            <div class="card-body">
 
-            <option value="<?= $project["id"] ?>"
-                <?= $task["project_id"] == $project["id"] ? "selected" : "" ?>>
+                <h1 class="fw-bold mb-4">
+                    Task bearbeiten
+                </h1>
 
-                <?= $project["title"] ?>
+                <form method="POST">
 
-            </option>
+                    <div class="mb-3">
 
-        <?php endforeach; ?>
+                        <label class="form-label">
+                            Projekt
+                        </label>
 
-    </select>
+                        <select
+                            name="project_id"
+                            class="form-select">
 
-    <br><br>
+                            <?php foreach ($projects as $project): ?>
 
-    <input type="text"
-           name="title"
-           value="<?= $task["title"] ?>"
-           required>
+                                <option
+                                    value="<?= $project["id"] ?>"
+                                    <?= $task["project_id"] == $project["id"] ? "selected" : "" ?>>
 
-    <br><br>
+                                    <?= $project["title"] ?>
 
-    <textarea name="description"><?= $task["description"] ?></textarea>
+                                </option>
 
-    <br><br>
+                            <?php endforeach; ?>
 
-    <select name="status">
+                        </select>
 
-        <option value="todo"
-            <?= $task["status"] == "todo" ? "selected" : "" ?>>
-            Todo
-        </option>
+                    </div>
 
-        <option value="progress"
-            <?= $task["status"] == "progress" ? "selected" : "" ?>>
-            In Progress
-        </option>
+                    <div class="mb-3">
 
-        <option value="done"
-            <?= $task["status"] == "done" ? "selected" : "" ?>>
-            Done
-        </option>
+                        <label class="form-label">
+                            Titel
+                        </label>
 
-    </select>
+                        <input
+                            type="text"
+                            name="title"
+                            class="form-control"
+                            value="<?= $task["title"] ?>"
+                            required>
 
-    <br><br>
+                    </div>
 
-    <button type="submit">Update Task</button>
+                    <div class="mb-3">
 
-</form>
+                        <label class="form-label">
+                            Beschreibung
+                        </label>
+
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="5"><?= $task["description"] ?></textarea>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <select
+                            name="status"
+                            class="form-select">
+
+                            <option value="todo"
+                                <?= $task["status"] == "todo" ? "selected" : "" ?>>
+                                Todo
+                            </option>
+
+                            <option value="progress"
+                                <?= $task["status"] == "progress" ? "selected" : "" ?>>
+                                In Progress
+                            </option>
+
+                            <option value="done"
+                                <?= $task["status"] == "done" ? "selected" : "" ?>>
+                                Done
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-success">
+
+                        Task aktualisieren
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<?php require "../includes/footer.php"; ?>

@@ -7,25 +7,65 @@ if (!isset($_SESSION["user_id"])) {
     exit();
 }
 
+require "../includes/header.php";
+require "../includes/sidebar.php";
+
 $stmt = $pdo->query("SELECT * FROM projects ORDER BY created_at DESC");
 $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<h2>Meine Projekte</h2>
+<div class="content">
 
-<a href="create.php">+ Neues Projekt</a>
+    <div class="container py-5">
 
-<br><br>
+        <div class="d-flex justify-content-between align-items-center mb-4">
 
-<?php foreach ($projects as $project): ?>
-    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-        <h3><?= $project["title"] ?></h3>
-        <p><?= $project["description"] ?></p>
+            <h1 class="fw-bold">
+                Projekte
+            </h1>
 
-        <a href="edit.php?id=<?= $project["id"] ?>">Edit</a>
+            <a href="create.php" class="btn btn-primary">
+                + Neues Projekt
+            </a>
 
-        <a href="delete.php?id=<?= $project["id"] ?>">
-            Delete
-        </a>
+        </div>
+
+        <?php foreach ($projects as $project): ?>
+
+            <div class="card shadow-sm border-0 mb-3">
+
+                <div class="card-body">
+
+                    <h3 class="fw-bold">
+                        <?= $project["title"] ?>
+                    </h3>
+
+                    <p class="text-muted">
+                        <?= $project["description"] ?>
+                    </p>
+
+                    <a
+                        href="edit.php?id=<?= $project["id"] ?>"
+                        class="btn btn-warning btn-sm">
+
+                        Edit
+                    </a>
+
+                    <a
+                        href="delete.php?id=<?= $project["id"] ?>"
+                        class="btn btn-danger btn-sm">
+
+                        Delete
+                    </a>
+
+                </div>
+
+            </div>
+
+        <?php endforeach; ?>
+
     </div>
-<?php endforeach; ?>
+
+</div>
+
+<?php require "../includes/footer.php"; ?>
