@@ -29,45 +29,110 @@ $doneTasks = $stmt->fetchColumn();
 <html>
 <head>
     <title>Dashboard</title>
-    <style>
-        body { font-family: Arial; background: #f4f4f4; }
-        .container { padding: 20px; }
-        .card {
-            display: inline-block;
-            background: white;
-            padding: 20px;
-            margin: 10px;
-            width: 200px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        h2 { margin: 0; }
-    </style>
+<head>
+    <title>Dashboard</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 </head>
-<body>
+</head>
+<body class="bg-light">
 
-<div class="container">
+<div class="container py-5">
 
-    <h1>Willkommen <?= $_SESSION["username"] ?> 🚀</h1>
+    <div class="d-flex justify-content-between align-items-center mb-5">
 
-    <div class="card">
-        <h2><?= $totalProjects ?></h2>
-        <p>Projekte</p>
+        <div>
+            <h1 class="fw-bold">
+                Willkommen <?= $_SESSION["username"] ?> 👋
+            </h1>
+
+            <p class="text-muted">
+                Smart Task Manager Dashboard
+            </p>
+        </div>
+
+        <a href="../logout.php" class="btn btn-danger">
+            Logout
+        </a>
+
     </div>
 
-    <div class="card">
-        <h2><?= $totalTasks ?></h2>
-        <p>Tasks</p>
-    </div>
+    <div class="row g-4">
 
-    <div class="card">
-        <h2><?= $openTasks ?></h2>
-        <p>Offene Tasks</p>
-    </div>
+        <div class="col-md-3">
 
-    <div class="card">
-        <h2><?= $doneTasks ?></h2>
-        <p>Erledigte Tasks</p>
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <h2 class="fw-bold">
+                        <?= $totalProjects ?>
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Projekte
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <h2 class="fw-bold">
+                        <?= $totalTasks ?>
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Tasks
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <h2 class="fw-bold">
+                        <?= $openTasks ?>
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Offene Tasks
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <h2 class="fw-bold">
+                        <?= $doneTasks ?>
+                    </h2>
+
+                    <p class="text-muted mb-0">
+                        Erledigte Tasks
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
 </div>
