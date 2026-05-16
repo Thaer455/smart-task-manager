@@ -10,12 +10,37 @@ if (!isset($_SESSION["user_id"])) {
 require "../includes/header.php";
 require "../includes/sidebar.php";
 
+$search = $_GET["search"] ?? "";
+$status = $_GET["status"] ?? "";
+
 $sql = "
 SELECT tasks.*, projects.title AS project_title
 FROM tasks
 JOIN projects ON tasks.project_id = projects.id
-ORDER BY tasks.created_at DESC
+WHERE 1=1
 ";
+
+$params = [];
+
+if (!empty($search)) {
+
+    $sql .= " AND tasks.title LIKE ?";
+    $params[] = "%$search%";
+}
+
+if (!empty($status)) {
+
+    $sql .= " AND tasks.status = ?";
+    $params[] = $status;
+}
+
+$sql .= " ORDER BY tasks.created_at DESC";
+
+$stmt = $pdo->prepare($sql);
+
+$stmt->execute($params);
+
+$tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt = $pdo->query($sql);
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -36,6 +61,66 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </a>
 
         </div>
+        <form method="GET" class="row mb-4">
+            <div class="col-md-4">
+
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Task suchen..."
+                    value="<?= $search ?>">
+
+            </div>
+
+            <div class="col-md-3">
+
+                <select
+                    name="status"
+                    class="form-select">
+
+                    <option value="">
+                        Alle Status
+                    </option>
+
+                    <option value="todo"
+                        <?= $status=="todo" ? "selected" : "" ?>>
+
+                        Todo
+
+                    </option>
+
+                    <option value="progress"
+                        <?= $status=="progress" ? "selected" : "" ?>>
+
+                        In Progress
+
+                    </option>
+
+                    <option value="done"
+                        <?= $status=="done" ? "selected" : "" ?>>
+
+                        Done
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-2">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+
+                    Suchen
+
+                </button>
+
+            </div>
+
+        </form>
 
         <?php foreach ($tasks as $task): ?>
 
