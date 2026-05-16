@@ -31,23 +31,22 @@ $doneTasks = $stmt->fetchColumn();
 
     <div class="container py-5">
 
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="mb-5">
 
-            <div>
+            <h1 class="fw-bold">
+                Willkommen <?= $_SESSION["username"] ?> 👋
+            </h1>
 
-                <h1 class="fw-bold">
-                    Willkommen <?= $_SESSION["username"] ?> 👋
-                </h1>
-
-                <p class="text-muted">
-                    Smart Task Manager Dashboard
-                </p>
-
-            </div>
+            <p class="text-muted">
+                Smart Task Manager Dashboard
+            </p>
 
         </div>
 
-        <div class="row g-4">
+
+        <!-- Statistik-Karten -->
+
+        <div class="row g-4 mb-5">
 
             <div class="col-md-3">
 
@@ -55,9 +54,7 @@ $doneTasks = $stmt->fetchColumn();
 
                     <div class="card-body">
 
-                        <h2 class="fw-bold">
-                            <?= $totalProjects ?>
-                        </h2>
+                        <h2><?= $totalProjects ?></h2>
 
                         <p class="text-muted mb-0">
                             Projekte
@@ -75,9 +72,7 @@ $doneTasks = $stmt->fetchColumn();
 
                     <div class="card-body">
 
-                        <h2 class="fw-bold">
-                            <?= $totalTasks ?>
-                        </h2>
+                        <h2><?= $totalTasks ?></h2>
 
                         <p class="text-muted mb-0">
                             Tasks
@@ -95,9 +90,7 @@ $doneTasks = $stmt->fetchColumn();
 
                     <div class="card-body">
 
-                        <h2 class="fw-bold">
-                            <?= $openTasks ?>
-                        </h2>
+                        <h2><?= $openTasks ?></h2>
 
                         <p class="text-muted mb-0">
                             Offene Tasks
@@ -115,9 +108,7 @@ $doneTasks = $stmt->fetchColumn();
 
                     <div class="card-body">
 
-                        <h2 class="fw-bold">
-                            <?= $doneTasks ?>
-                        </h2>
+                        <h2><?= $doneTasks ?></h2>
 
                         <p class="text-muted mb-0">
                             Erledigte Tasks
@@ -131,8 +122,116 @@ $doneTasks = $stmt->fetchColumn();
 
         </div>
 
+
+        <!-- Schnellaktionen -->
+
+        <div class="row mb-5">
+
+            <div class="col">
+
+                <a href="../projects/create.php"
+                   class="btn btn-primary">
+
+                    + Projekt erstellen
+                </a>
+
+                <a href="../tasks/create.php"
+                   class="btn btn-success">
+
+                    + Task erstellen
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- Letzte Projekte -->
+
+        <?php
+        $stmt = $pdo->query("
+        SELECT *
+        FROM projects
+        ORDER BY created_at DESC
+        LIMIT 5
+        ");
+
+        $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ?>
+
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Letzte Projekte
+                </h4>
+
+                <ul class="list-group">
+
+                    <?php foreach($projects as $project): ?>
+
+                    <li class="list-group-item">
+
+                        <?= $project["title"] ?>
+
+                    </li>
+
+                    <?php endforeach; ?>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+
+        <!-- Letzte Tasks -->
+
+        <?php
+        $stmt = $pdo->query("
+        SELECT *
+        FROM tasks
+        ORDER BY created_at DESC
+        LIMIT 5
+        ");
+
+        $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ?>
+
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body">
+
+                <h4 class="mb-3">
+                    Letzte Tasks
+                </h4>
+
+                <ul class="list-group">
+
+                    <?php foreach($tasks as $task): ?>
+
+                    <li class="list-group-item d-flex justify-content-between">
+
+                        <?= $task["title"] ?>
+
+                        <span class="badge bg-primary">
+
+                            <?= $task["status"] ?>
+
+                        </span>
+
+                    </li>
+
+                    <?php endforeach; ?>
+
+                </ul>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
-
 <?php require "../includes/footer.php"; ?>
