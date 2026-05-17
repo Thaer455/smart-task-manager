@@ -14,9 +14,13 @@ $search = $_GET["search"] ?? "";
 $status = $_GET["status"] ?? "";
 
 $sql = "
-SELECT tasks.*, projects.title AS project_title
+SELECT
+tasks.*,
+projects.title AS project_title,
+users.username AS assigned_user
 FROM tasks
 JOIN projects ON tasks.project_id = projects.id
+LEFT JOIN users ON tasks.assigned_to = users.id
 WHERE 1=1
 ";
 
@@ -42,157 +46,205 @@ $stmt->execute($params);
 
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->query($sql);
-$tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <div class="content">
 
-    <div class="container py-5">
+<div class="container py-5">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-            <h1 class="fw-bold">
-                Tasks
-            </h1>
+<h1 class="fw-bold">
+Tasks
+</h1>
 
-            <a href="create.php" class="btn btn-primary">
-                + Neue Task
-            </a>
+<a href="create.php" class="btn btn-primary">
 
-        </div>
-        <form method="GET" class="row mb-4">
-            <div class="col-md-4">
++ Neue Task
 
-                <input
-                    type="text"
-                    name="search"
-                    class="form-control"
-                    placeholder="Task suchen..."
-                    value="<?= $search ?>">
+</a>
 
-            </div>
+</div>
 
-            <div class="col-md-3">
 
-                <select
-                    name="status"
-                    class="form-select">
+<form method="GET" class="row mb-4">
 
-                    <option value="">
-                        Alle Status
-                    </option>
+<div class="col-md-4">
 
-                    <option value="todo"
-                        <?= $status=="todo" ? "selected" : "" ?>>
+<input
+type="text"
+name="search"
+class="form-control"
+placeholder="Task suchen..."
+value="<?= $search ?>">
 
-                        Todo
+</div>
 
-                    </option>
 
-                    <option value="progress"
-                        <?= $status=="progress" ? "selected" : "" ?>>
+<div class="col-md-3">
 
-                        In Progress
+<select
+name="status"
+class="form-select">
 
-                    </option>
+<option value="">
+Alle Status
+</option>
 
-                    <option value="done"
-                        <?= $status=="done" ? "selected" : "" ?>>
+<option value="todo"
+<?= $status=="todo" ? "selected" : "" ?>>
 
-                        Done
+Todo
 
-                    </option>
+</option>
 
-                </select>
+<option value="progress"
+<?= $status=="progress" ? "selected" : "" ?>>
 
-            </div>
+In Progress
 
-            <div class="col-md-2">
+</option>
 
-                <button
-                    type="submit"
-                    class="btn btn-primary">
+<option value="done"
+<?= $status=="done" ? "selected" : "" ?>>
 
-                    Suchen
+Done
 
-                </button>
+</option>
 
-            </div>
+</select>
 
-        </form>
+</div>
 
-        <?php foreach ($tasks as $task): ?>
 
-            <div class="card shadow-sm border-0 mb-3">
+<div class="col-md-2">
 
-                <div class="card-body">
+<button
+type="submit"
+class="btn btn-primary">
 
-                    <h3 class="fw-bold">
-                        <?= $task["title"] ?>
-                    </h3>
+Suchen
 
-                    <p class="text-muted">
-                        <?= $task["description"] ?>
-                    </p>
+</button>
 
-                    <p>
-                        <strong>Projekt:</strong>
-                        <?= $task["project_title"] ?>
-                    </p>
+</div>
 
-                    <form action="update_status.php" method="POST">
+</form>
 
-                        <input
-                            type="hidden"
-                            name="task_id"
-                            value="<?= $task["id"] ?>">
 
-                        <select
-                            name="status"
-                            class="form-select w-25 mb-3"
-                            onchange="this.form.submit()">
+<?php foreach ($tasks as $task): ?>
 
-                            <option value="todo"
-                                <?= $task["status"] == "todo" ? "selected" : "" ?>>
-                                Todo
-                            </option>
+<div class="card shadow-sm border-0 mb-3">
 
-                            <option value="progress"
-                                <?= $task["status"] == "progress" ? "selected" : "" ?>>
-                                In Progress
-                            </option>
+<div class="card-body">
 
-                            <option value="done"
-                                <?= $task["status"] == "done" ? "selected" : "" ?>>
-                                Done
-                            </option>
+<h3 class="fw-bold">
 
-                        </select>
+<?= $task["title"] ?>
 
-                    </form>
+</h3>
 
-                    <a
-                        href="edit.php?id=<?= $task["id"] ?>"
-                        class="btn btn-warning btn-sm">
+<p class="text-muted">
 
-                        Edit
-                    </a>
+<?= $task["description"] ?>
 
-                    <a
-                        href="delete.php?id=<?= $task["id"] ?>"
-                        class="btn btn-danger btn-sm">
+</p>
 
-                        Delete
-                    </a>
+<p>
 
-                </div>
+<strong>Projekt:</strong>
 
-            </div>
+<?= $task["project_title"] ?>
 
-        <?php endforeach; ?>
+<br>
 
-    </div>
+<strong>Zugewiesen:</strong>
+
+<?= $task["assigned_user"] ?? "Nicht zugewiesen" ?>
+
+<br>
+
+<strong>Priorität:</strong>
+
+<?= ucfirst($task["priority"]) ?>
+
+<br>
+
+<strong>Deadline:</strong>
+
+<?= $task["deadline"] ?>
+
+</p>
+
+
+<form
+action="update_status.php"
+method="POST">
+
+<input
+type="hidden"
+name="task_id"
+value="<?= $task["id"] ?>">
+
+
+<select
+name="status"
+class="form-select w-25 mb-3"
+onchange="this.form.submit()">
+
+<option
+value="todo"
+<?= $task["status"]=="todo" ? "selected" : "" ?>>
+
+Todo
+
+</option>
+
+<option
+value="progress"
+<?= $task["status"]=="progress" ? "selected" : "" ?>>
+
+In Progress
+
+</option>
+
+<option
+value="done"
+<?= $task["status"]=="done" ? "selected" : "" ?>>
+
+Done
+
+</option>
+
+</select>
+
+</form>
+
+
+<a
+href="edit.php?id=<?= $task["id"] ?>"
+class="btn btn-warning btn-sm">
+
+Edit
+
+</a>
+
+
+<a
+href="delete.php?id=<?= $task["id"] ?>"
+class="btn btn-danger btn-sm">
+
+Delete
+
+</a>
+
+</div>
+
+</div>
+
+<?php endforeach; ?>
+
+</div>
 
 </div>
 

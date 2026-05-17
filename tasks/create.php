@@ -14,25 +14,36 @@ require "../includes/sidebar.php";
 $stmt = $pdo->query("SELECT * FROM projects");
 $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Benutzer laden
+$stmt = $pdo->query("SELECT id, username FROM users");
+$users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $project_id = $_POST["project_id"];
+    $assigned_to = $_POST["assigned_to"];
     $title = $_POST["title"];
     $description = $_POST["description"];
     $status = $_POST["status"];
+    $priority = $_POST["priority"];
+    $deadline = $_POST["deadline"];
 
     $sql = "
-    INSERT INTO tasks (project_id, title, description, status)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO tasks
+    (project_id, assigned_to, title, description, status, priority, deadline)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
     ";
 
     $stmt = $pdo->prepare($sql);
 
     $stmt->execute([
         $project_id,
+        $assigned_to,
         $title,
         $description,
-        $status
+        $status,
+        $priority,
+        $deadline
     ]);
 
     header("Location: list.php");
@@ -42,105 +53,168 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <div class="content">
 
-    <div class="container py-5">
+<div class="container py-5">
 
-        <div class="card shadow-sm border-0">
+<div class="card shadow-sm border-0">
 
-            <div class="card-body">
+<div class="card-body">
 
-                <h1 class="fw-bold mb-4">
-                    Neue Task
-                </h1>
+<h1 class="fw-bold mb-4">
+Neue Task
+</h1>
 
-                <form method="POST">
+<form method="POST">
 
-                    <div class="mb-3">
 
-                        <label class="form-label">
-                            Projekt
-                        </label>
+<div class="mb-3">
 
-                        <select
-                            name="project_id"
-                            class="form-select"
-                            required>
+<label class="form-label">
+Projekt
+</label>
 
-                            <option value="">
-                                Projekt auswählen
-                            </option>
+<select
+name="project_id"
+class="form-select"
+required>
 
-                            <?php foreach ($projects as $project): ?>
+<option value="">
+Projekt auswählen
+</option>
 
-                                <option value="<?= $project["id"] ?>">
-                                    <?= $project["title"] ?>
-                                </option>
+<?php foreach ($projects as $project): ?>
 
-                            <?php endforeach; ?>
+<option value="<?= $project["id"] ?>">
 
-                        </select>
+<?= $project["title"] ?>
 
-                    </div>
+</option>
 
-                    <div class="mb-3">
+<?php endforeach; ?>
 
-                        <label class="form-label">
-                            Titel
-                        </label>
+</select>
 
-                        <input
-                            type="text"
-                            name="title"
-                            class="form-control"
-                            required>
+</div>
 
-                    </div>
 
-                    <div class="mb-3">
+<div class="mb-3">
 
-                        <label class="form-label">
-                            Beschreibung
-                        </label>
+<label class="form-label">
+Zugewiesen an
+</label>
 
-                        <textarea
-                            name="description"
-                            class="form-control"
-                            rows="5"></textarea>
+<select
+name="assigned_to"
+class="form-select">
 
-                    </div>
+<?php foreach($users as $user): ?>
 
-                    <div class="mb-3">
+<option value="<?= $user["id"] ?>">
 
-                        <label class="form-label">
-                            Status
-                        </label>
+<?= $user["username"] ?>
 
-                        <select
-                            name="status"
-                            class="form-select">
+</option>
 
-                            <option value="todo">Todo</option>
-                            <option value="progress">In Progress</option>
-                            <option value="done">Done</option>
+<?php endforeach; ?>
 
-                        </select>
+</select>
 
-                    </div>
+</div>
 
-                    <button
-                        type="submit"
-                        class="btn btn-primary">
 
-                        Task erstellen
-                    </button>
+<div class="mb-3">
 
-                </form>
+<label class="form-label">
+Titel
+</label>
 
-            </div>
+<input
+type="text"
+name="title"
+class="form-control"
+required>
 
-        </div>
+</div>
 
-    </div>
 
+<div class="mb-3">
+
+<label class="form-label">
+Beschreibung
+</label>
+
+<textarea
+name="description"
+class="form-control"
+rows="5"></textarea>
+
+</div>
+
+
+<div class="mb-3">
+
+<label class="form-label">
+Priorität
+</label>
+
+<select
+name="priority"
+class="form-select">
+
+<option value="low">Low</option>
+<option value="medium">Medium</option>
+<option value="high">High</option>
+
+</select>
+
+</div>
+
+
+<div class="mb-3">
+
+<label class="form-label">
+Deadline
+</label>
+
+<input
+type="date"
+name="deadline"
+class="form-control">
+
+</div>
+
+
+<div class="mb-3">
+
+<label class="form-label">
+Status
+</label>
+
+<select
+name="status"
+class="form-select">
+
+<option value="todo">Todo</option>
+<option value="progress">In Progress</option>
+<option value="done">Done</option>
+
+</select>
+
+</div>
+
+
+<button
+type="submit"
+class="btn btn-primary">
+
+Task erstellen
+
+</button>
+
+</form>
+
+</div>
+</div>
+</div>
 </div>
 
 <?php require "../includes/footer.php"; ?>
