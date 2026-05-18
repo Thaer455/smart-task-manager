@@ -71,12 +71,22 @@ Tasks
 
 <div class="col-md-4">
 
+<div class="input-group shadow-sm">
+
+<span class="input-group-text">
+
+🔍
+
+</span>
+
 <input
 type="text"
 name="search"
 class="form-control"
-placeholder="Task suchen..."
+placeholder="Task nach Titel suchen..."
 value="<?= $search ?>">
+
+</div>
 
 </div>
 
