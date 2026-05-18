@@ -30,12 +30,42 @@ $stmt = $pdo->query(
 
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$sql="
+SELECT users.*, project_members.id AS member_id
+FROM project_members
+JOIN users
+ON project_members.user_id=users.id
+WHERE project_members.project_id=?
+";
+
+$stmt=$pdo->prepare($sql);
+
+$stmt->execute([$project_id]);
+
+$members=$stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Mitglied hinzufügen
 
 if($_SERVER["REQUEST_METHOD"]==="POST"){
 
 $user_id=$_POST["user_id"];
+
+$sql="
+SELECT *
+FROM project_members
+WHERE project_id=? AND user_id=?
+";
+
+$stmt=$pdo->prepare($sql);
+
+$stmt->execute([
+$project_id,
+$user_id
+]);
+
+$exists=$stmt->fetch();
+
+if(!$exists){
 
 $sql="
 INSERT INTO project_members
@@ -51,8 +81,12 @@ $user_id
 ]);
 
 }
-?>
 
+header("Location: members.php?id=".$project_id);
+exit();
+
+}
+?>
 
 <div class="content">
 
@@ -67,7 +101,7 @@ Mitglieder für:
 </h1>
 
 
-<div class="card shadow-sm border-0">
+<div class="card shadow-sm border-0 mb-4">
 
 <div class="card-body">
 
@@ -99,7 +133,6 @@ class="form-select">
 
 </div>
 
-
 <button
 class="btn btn-primary">
 
@@ -108,6 +141,43 @@ Mitglied hinzufügen
 </button>
 
 </form>
+
+</div>
+
+</div>
+
+
+<div class="card shadow-sm border-0">
+
+<div class="card-body">
+
+<h3 class="mb-4">
+
+Projekt-Mitglieder
+
+</h3>
+
+<?php foreach($members as $member): ?>
+
+<div class="d-flex justify-content-between align-items-center border-bottom py-3">
+
+<div>
+
+<?= $member["username"] ?>
+
+</div>
+
+<a
+href="remove_member.php?id=<?= $member["member_id"] ?>&project=<?= $project_id ?>"
+class="btn btn-outline-danger btn-sm">
+
+Entfernen
+
+</a>
+
+</div>
+
+<?php endforeach; ?>
 
 </div>
 
