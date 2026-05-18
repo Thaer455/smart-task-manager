@@ -50,7 +50,7 @@ $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         Edit
                     </a>
-                    <as
+                    <a
                     href="members.php?id=<?= $project["id"] ?>"
                     class="btn btn-info btn-sm">
 
