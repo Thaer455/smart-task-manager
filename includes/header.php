@@ -13,71 +13,82 @@
 
     <style>
 
-        body{
-            background:#f5f6fa;
-            transition:.3s;
-        }
+body{
+    background:#f5f6fa;
+    transition:.3s;
+}
 
-        .sidebar{
-            width:250px;
-            height:100vh;
-            background:#212529;
-            position:fixed;
-            left:0;
-            top:0;
-            padding-top:20px;
-        }
+.sidebar{
+    width:250px;
+    height:100vh;
+    background:#212529;
+    position:fixed;
+    left:0;
+    top:0;
+    padding-top:20px;
+}
 
-        .sidebar a{
-            display:block;
-            color:white;
-            padding:15px 20px;
-            text-decoration:none;
-        }
+.sidebar a{
+    display:block;
+    color:white;
+    padding:15px 20px;
+    text-decoration:none;
+}
 
-        .sidebar a:hover{
-            background:#343a40;
-        }
+.sidebar a:hover{
+    background:#343a40;
+}
 
-        .content{
-            margin-left:250px;
-            padding:30px;
-        }
+.content{
+    margin-left:250px;
+    padding:30px;
+}
 
-        /* Dark Mode */
 
-        .dark-mode{
-            background:#121212;
-            color:white;
-        }
+/* Dark Mode */
 
-        .dark-mode .card{
-            background:#1f1f1f;
-            color:white;
-        }
+.dark-mode{
+    background:#121212;
+    color:white;
+}
 
-        .dark-mode .text-muted{
-            color:#bdbdbd !important;
-        }
+.dark-mode .card{
+    background:#1f1f1f;
+    color:white;
+}
 
-        .dark-mode .list-group-item{
-            background:#1f1f1f;
-            color:white;
-            border-color:#333;
-        }
+.dark-mode .text-muted{
+    color:#bdbdbd !important;
+}
 
-        .dark-mode .form-control,
-        .dark-mode .form-select{
-            background:#2c2c2c;
-            color:white;
-            border-color:#444;
-        }
+.dark-mode .list-group-item{
+    background:#1f1f1f;
+    color:white;
+    border-color:#333;
+}
 
-        .dark-mode .navbar{
-            background:black !important;
-        }
+.dark-mode .form-control,
+.dark-mode .form-select{
+    background:#2c2c2c;
+    color:white;
+    border-color:#444;
+}
 
-    </style>
+.dark-mode .form-control::placeholder{
+    color:#bdbdbd;
+}
+
+.dark-mode .input-group-text{
+    background:#2c2c2c;
+    color:white;
+    border-color:#444;
+}
+
+.dark-mode .navbar{
+    background:black !important;
+}
+
+</style>
 
 </head>
 
