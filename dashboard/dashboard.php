@@ -25,6 +25,35 @@ $openTasks = $stmt->fetchColumn();
 // Fertige Tasks
 $stmt = $pdo->query("SELECT COUNT(*) FROM tasks WHERE status = 'done'");
 $doneTasks = $stmt->fetchColumn();
+
+// Todo Tasks
+$stmt = $pdo->query("
+SELECT COUNT(*)
+FROM tasks
+WHERE status='todo'
+");
+
+$todoTasks = $stmt->fetchColumn();
+
+
+// Progress Tasks
+$stmt = $pdo->query("
+SELECT COUNT(*)
+FROM tasks
+WHERE status='progress'
+");
+
+$progressTasks = $stmt->fetchColumn();
+
+
+// Done Tasks
+$stmt = $pdo->query("
+SELECT COUNT(*)
+FROM tasks
+WHERE status='done'
+");
+
+$doneTasks = $stmt->fetchColumn();
 ?>
 
 <div class="content">
@@ -234,4 +263,58 @@ $doneTasks = $stmt->fetchColumn();
     </div>
 
 </div>
+<div class="card shadow-sm border-0 mt-4">
+
+<div class="card-body">
+
+<h4 class="mb-4">
+
+📊 Task Status Übersicht
+
+</h4>
+
+<canvas id="taskChart"></canvas>
+
+</div>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctx = document.getElementById(
+'taskChart'
+);
+
+new Chart(ctx,{
+
+type:'doughnut',
+
+data:{
+
+labels:[
+'Todo',
+'Progress',
+'Done'
+],
+
+datasets:[{
+
+data:[
+
+<?= $todoTasks ?>,
+<?= $progressTasks ?>,
+<?= $doneTasks ?>
+
+]
+
+}]
+
+}
+
+});
+
+</script>
 <?php require "../includes/footer.php"; ?>
