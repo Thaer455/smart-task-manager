@@ -1,21 +1,19 @@
 <?php
-session_start();
+
 require "../config/database.php";
 
-if (!isset($_SESSION["user_id"])) {
-    header("Location: ../login.php");
-    exit();
-}
+$task_id=$_POST["task_id"];
+$status=$_POST["status"];
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+$sql="
+UPDATE tasks
+SET status=?
+WHERE id=?
+";
 
-    $task_id = $_POST["task_id"];
-    $status = $_POST["status"];
+$stmt=$pdo->prepare($sql);
 
-    $sql = "UPDATE tasks SET status = ? WHERE id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$status, $task_id]);
-
-    header("Location: list.php");
-    exit();
-}
+$stmt->execute([
+$status,
+$task_id
+]);

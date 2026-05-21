@@ -45,7 +45,6 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 
 <div class="content">
@@ -58,7 +57,9 @@ $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 Tasks
 </h1>
 
-<a href="create.php" class="btn btn-primary">
+<a
+href="create.php"
+class="btn btn-primary">
 
 + Neue Task
 
@@ -101,21 +102,24 @@ class="form-select">
 Alle Status
 </option>
 
-<option value="todo"
+<option
+value="todo"
 <?= $status=="todo" ? "selected" : "" ?>>
 
 Todo
 
 </option>
 
-<option value="progress"
+<option
+value="progress"
 <?= $status=="progress" ? "selected" : "" ?>>
 
 In Progress
 
 </option>
 
-<option value="done"
+<option
+value="done"
 <?= $status=="done" ? "selected" : "" ?>>
 
 Done
@@ -131,9 +135,9 @@ Done
 
 <button
 type="submit"
-class="btn btn-primary">
+class="btn btn-primary w-100">
 
-Suchen
+🔍 Suche starten
 
 </button>
 
@@ -187,20 +191,9 @@ Suchen
 </p>
 
 
-<form
-action="update_status.php"
-method="POST">
-
-<input
-type="hidden"
-name="task_id"
-value="<?= $task["id"] ?>">
-
-
 <select
-name="status"
-class="form-select w-25 mb-3"
-onchange="this.form.submit()">
+class="form-select w-25 mb-3 task-status"
+data-id="<?= $task["id"] ?>">
 
 <option
 value="todo"
@@ -227,8 +220,6 @@ Done
 </option>
 
 </select>
-
-</form>
 
 
 <a
@@ -257,5 +248,58 @@ Delete
 </div>
 
 </div>
+
+
+<script>
+
+document
+.querySelectorAll(".task-status")
+.forEach(select=>{
+
+select.addEventListener(
+"change",
+function(){
+
+let taskId =
+this.dataset.id;
+
+let status =
+this.value;
+
+fetch(
+"update_status.php",
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/x-www-form-urlencoded"
+},
+
+body:
+"task_id="
++taskId+
+"&status="
++status
+
+}
+
+)
+
+.then(response=>response.text())
+
+.then(data=>{
+
+console.log(
+"Status gespeichert"
+);
+
+});
+
+});
+
+});
+
+</script>
 
 <?php require "../includes/footer.php"; ?>
