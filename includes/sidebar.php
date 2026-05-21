@@ -15,5 +15,9 @@
     <a href="../tasks/list.php">
         Tasks
     </a>
+    <a href="../tasks/board.php">
 
+    Kanban Board
+
+    </a>
 </div>
