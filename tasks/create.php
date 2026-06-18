@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 require "../config/database.php";
 
@@ -26,8 +27,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $description = $_POST["description"];
     $status = $_POST["status"];
     $priority = $_POST["priority"];
-    $deadline = $_POST["deadline"];
-
+    $deadline = !empty($_POST["deadline"])
+        ? $_POST["deadline"]
+        : null;
     $sql = "
     INSERT INTO tasks
     (project_id, assigned_to, title, description, status, priority, deadline)
@@ -36,18 +38,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $stmt = $pdo->prepare($sql);
 
-    $stmt->execute([
-        $project_id,
-        $assigned_to,
-        $title,
-        $description,
-        $status,
-        $priority,
-        $deadline
-    ]);
+    try {
 
-    header("Location: list.php");
-    exit();
+        $stmt->execute([
+            $project_id,
+            $assigned_to,
+            $title,
+            $description,
+            $status,
+            $priority,
+            $deadline
+        ]);
+
+        echo "Task gespeichert";
+        exit();
+
+    } catch (PDOException $e) {
+
+        echo $e->getMessage();
+        exit();
+
+}
 }
 ?>
 
