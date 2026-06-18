@@ -63,12 +63,15 @@ Todo
 
 </div>
 
-<div class="card-body">
-
+<div
+class="card-body drop-zone"
+data-status="todo">
 <?php foreach($todo as $task): ?>
 
-<div class="card mb-3">
-
+<div
+class="card mb-3 task-card"
+draggable="true"
+data-id="<?= $task["id"] ?>">
 <div class="card-body">
 
 <h6>
@@ -108,12 +111,15 @@ Progress
 
 </div>
 
-<div class="card-body">
-
+<div
+class="card-body drop-zone"
+data-status="progress">
 <?php foreach($progress as $task): ?>
 
-<div class="card mb-3">
-
+<div
+class="card mb-3 task-card"
+draggable="true"
+data-id="<?= $task["id"] ?>">
 <div class="card-body">
 
 <h6>
@@ -153,12 +159,15 @@ Done
 
 </div>
 
-<div class="card-body">
-
+<div
+class="card-body drop-zone"
+data-status="done">
 <?php foreach($done as $task): ?>
 
-<div class="card mb-3">
-
+<div
+class="card mb-3 task-card"
+draggable="true"
+data-id="<?= $task["id"] ?>">
 <div class="card-body">
 
 <h6>
@@ -190,5 +199,85 @@ Done
 </div>
 
 </div>
+<script>
+
+let draggedTask=null;
+
+document
+.querySelectorAll(".task-card")
+.forEach(card=>{
+
+card.addEventListener(
+"dragstart",
+function(){
+
+draggedTask=this;
+
+});
+
+});
+
+
+document
+.querySelectorAll(".drop-zone")
+.forEach(zone=>{
+
+zone.addEventListener(
+"dragover",
+function(e){
+
+e.preventDefault();
+
+});
+
+zone.addEventListener(
+"drop",
+function(){
+
+this.appendChild(
+draggedTask
+);
+
+let taskId=
+draggedTask.dataset.id;
+
+let status=
+this.dataset.status;
+
+fetch(
+"update_status.php",
+{
+method:"POST",
+
+headers:{
+"Content-Type":
+"application/x-www-form-urlencoded"
+},
+
+body:
+"task_id="
++taskId+
+"&status="
++status
+
+}
+
+)
+
+.then(response=>response.text())
+
+.then(data=>{
+
+console.log(
+"Kanban updated"
+);
+
+});
+
+});
+
+});
+
+</script>
 
 <?php require "../includes/footer.php"; ?>
