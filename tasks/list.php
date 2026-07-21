@@ -14,6 +14,8 @@ $tasks = TaskController::index($pdo);
 $search = $_GET["search"] ?? "";
 $status = $_GET["status"] ?? "";
 
+$tasks = TaskController::index($pdo, $search, $status);
+
 ?>
 
 <?php require "../includes/header.php"; ?>
