@@ -2,6 +2,7 @@
 
 session_start();
 require "../config/database.php";
+require "../app/controllers/TaskController.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../login.php");
@@ -30,33 +31,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $deadline = !empty($_POST["deadline"])
         ? $_POST["deadline"]
         : null;
-    $sql = "
-    INSERT INTO tasks
-    (project_id, assigned_to, title, description, status, priority, deadline)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-    ";
+   try {
 
-    $stmt = $pdo->prepare($sql);
+    TaskController::create($pdo, [
 
-    try {
+        "project_id" => $project_id,
+        "assigned_to" => $assigned_to,
+        "title" => $title,
+        "description" => $description,
+        "status" => $status,
+        "priority" => $priority,
+        "deadline" => $deadline
 
-        $stmt->execute([
-            $project_id,
-            $assigned_to,
-            $title,
-            $description,
-            $status,
-            $priority,
-            $deadline
-        ]);
+    ]);
 
-        echo "Task gespeichert";
-        exit();
+    header("Location: list.php");
+    exit();
 
-    } catch (PDOException $e) {
+} catch (PDOException $e) {
 
-        echo $e->getMessage();
-        exit();
+    echo $e->getMessage();
+    exit();
 
 }
 }
