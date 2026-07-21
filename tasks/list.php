@@ -60,9 +60,29 @@ value="<?= $search ?>">
 
 <option value="">Alle Status</option>
 
-<option value="todo">Todo</option>
-<option value="progress">In Progress</option>
-<option value="done">Done</option>
+<option
+value="todo"
+<?= $status == "todo" ? "selected" : "" ?>>
+
+Todo
+
+</option>
+
+<option
+value="progress"
+<?= $status == "progress" ? "selected" : "" ?>>
+
+In Progress
+
+</option>
+
+<option
+value="done"
+<?= $status == "done" ? "selected" : "" ?>>
+
+Done
+
+</option>
 
 </select>
 
