@@ -26,4 +26,8 @@ class TaskController
 {
     return Task::update($pdo, $id, $data);
 }
+    public static function delete($pdo, $id)
+{
+    return Task::delete($pdo, $id);
+}
 }

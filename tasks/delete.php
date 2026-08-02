@@ -1,6 +1,8 @@
 <?php
 session_start();
+
 require "../config/database.php";
+require "../app/controllers/TaskController.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../login.php");
@@ -9,10 +11,7 @@ if (!isset($_SESSION["user_id"])) {
 
 $id = $_GET["id"];
 
-$sql = "DELETE FROM tasks WHERE id = ?";
-$stmt = $pdo->prepare($sql);
-
-$stmt->execute([$id]);
+TaskController::delete($pdo, $id);
 
 header("Location: list.php");
 exit();

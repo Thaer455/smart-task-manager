@@ -113,4 +113,13 @@ public static function update($pdo, $id, $data)
         $id
     ]);
 }
+public static function delete($pdo, $id)
+{
+    $stmt = $pdo->prepare("
+        DELETE FROM tasks
+        WHERE id = ?
+    ");
+
+    return $stmt->execute([$id]);
+}
 }
