@@ -1,6 +1,8 @@
 <?php
 session_start();
+
 require "../config/database.php";
+require "../app/controllers/TaskController.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: ../login.php");
@@ -12,18 +14,14 @@ require "../includes/sidebar.php";
 
 $id = $_GET["id"];
 
-// Task laden
-$sql = "SELECT * FROM tasks WHERE id = ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute([$id]);
-
-$task = $stmt->fetch(PDO::FETCH_ASSOC);
+// Task laden über den Controller
+$task = TaskController::find($pdo, $id);
 
 if (!$task) {
     die("Task not found");
 }
 
-// Projekte laden
+// Projekte laden (bleibt vorerst hier)
 $stmt = $pdo->query("SELECT * FROM projects");
 $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -35,20 +33,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $description = $_POST["description"];
     $status = $_POST["status"];
 
-    $sql = "
-    UPDATE tasks
-    SET project_id = ?, title = ?, description = ?, status = ?
-    WHERE id = ?
-    ";
+    TaskController::update($pdo, $id, [
 
-    $stmt = $pdo->prepare($sql);
+        "project_id" => $project_id,
+        "assigned_to" => $task["assigned_to"],
+        "title" => $title,
+        "description" => $description,
+        "status" => $status,
+        "priority" => $task["priority"],
+        "deadline" => $task["deadline"]
 
-    $stmt->execute([
-        $project_id,
-        $title,
-        $description,
-        $status,
-        $id
     ]);
 
     header("Location: list.php");
@@ -134,17 +128,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             name="status"
                             class="form-select">
 
-                            <option value="todo"
+                            <option
+                                value="todo"
                                 <?= $task["status"] == "todo" ? "selected" : "" ?>>
                                 Todo
                             </option>
 
-                            <option value="progress"
+                            <option
+                                value="progress"
                                 <?= $task["status"] == "progress" ? "selected" : "" ?>>
                                 In Progress
                             </option>
 
-                            <option value="done"
+                            <option
+                                value="done"
                                 <?= $task["status"] == "done" ? "selected" : "" ?>>
                                 Done
                             </option>
@@ -158,6 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         class="btn btn-success">
 
                         Task aktualisieren
+
                     </button>
 
                 </form>
