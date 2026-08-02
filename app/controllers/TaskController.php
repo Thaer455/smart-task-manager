@@ -13,4 +13,17 @@ class TaskController
     {
         return Task::updateStatus($pdo, $id, $status);
     }
+    public static function create($pdo, $data)
+    {
+        return Task::create($pdo, $data);
+    }
+    public static function find($pdo, $id)
+{
+    return Task::find($pdo, $id);
+}
+
+    public static function update($pdo, $id, $data)
+{
+    return Task::update($pdo, $id, $data);
+}
 }
