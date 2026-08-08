@@ -81,11 +81,16 @@ require "../includes/sidebar.php";
 
                     </div>
 
-                    <div class="card-body">
+                    <div
+                        class="card-body kanban-column"
+                        data-status="todo">
 
                         <?php foreach ($todoTasks as $task): ?>
 
-                            <div class="card mb-3 shadow-sm">
+                            <div
+                                class="card mb-3 shadow-sm kanban-task"
+                                draggable="true"
+                                data-id="<?= $task["id"] ?>">
 
                                 <div class="card-body">
 
@@ -126,6 +131,7 @@ require "../includes/sidebar.php";
                             </div>
 
                         <?php endforeach; ?>
+
 
                         <?php if (empty($todoTasks)): ?>
 
@@ -156,11 +162,16 @@ require "../includes/sidebar.php";
 
                     </div>
 
-                    <div class="card-body">
+                    <div
+                        class="card-body kanban-column"
+                        data-status="progress">
 
                         <?php foreach ($progressTasks as $task): ?>
 
-                            <div class="card mb-3 shadow-sm">
+                            <div
+                                class="card mb-3 shadow-sm kanban-task"
+                                draggable="true"
+                                data-id="<?= $task["id"] ?>">
 
                                 <div class="card-body">
 
@@ -201,6 +212,7 @@ require "../includes/sidebar.php";
                             </div>
 
                         <?php endforeach; ?>
+
 
                         <?php if (empty($progressTasks)): ?>
 
@@ -231,11 +243,16 @@ require "../includes/sidebar.php";
 
                     </div>
 
-                    <div class="card-body">
+                    <div
+                        class="card-body kanban-column"
+                        data-status="done">
 
                         <?php foreach ($doneTasks as $task): ?>
 
-                            <div class="card mb-3 shadow-sm">
+                            <div
+                                class="card mb-3 shadow-sm kanban-task"
+                                draggable="true"
+                                data-id="<?= $task["id"] ?>">
 
                                 <div class="card-body">
 
@@ -277,6 +294,7 @@ require "../includes/sidebar.php";
 
                         <?php endforeach; ?>
 
+
                         <?php if (empty($doneTasks)): ?>
 
                             <p class="text-muted text-center">
@@ -296,5 +314,139 @@ require "../includes/sidebar.php";
     </div>
 
 </div>
+
+
+<script>
+
+let draggedTask = null;
+
+
+// Task wird gezogen
+document.querySelectorAll(".kanban-task").forEach(task => {
+
+    task.addEventListener("dragstart", function () {
+
+        draggedTask = this;
+
+        this.classList.add("opacity-50");
+
+    });
+
+
+    task.addEventListener("dragend", function () {
+
+        this.classList.remove("opacity-50");
+
+    });
+
+});
+
+
+// Kanban-Spalten
+document.querySelectorAll(".kanban-column").forEach(column => {
+
+
+    // Erlaubt das Ablegen
+    column.addEventListener("dragover", function (event) {
+
+        event.preventDefault();
+
+        this.classList.add("bg-light");
+
+    });
+
+
+    // Highlight entfernen
+    column.addEventListener("dragleave", function () {
+
+        this.classList.remove("bg-light");
+
+    });
+
+
+    // Task ablegen
+    column.addEventListener("drop", function (event) {
+
+        event.preventDefault();
+
+        this.classList.remove("bg-light");
+
+
+        if (!draggedTask) {
+            return;
+        }
+
+
+        let taskId = draggedTask.dataset.id;
+
+        let newStatus = this.dataset.status;
+
+
+        fetch("update_status.php", {
+
+            method: "POST",
+
+            headers: {
+
+                "Content-Type":
+                    "application/x-www-form-urlencoded"
+
+            },
+
+            body:
+                "task_id=" +
+                encodeURIComponent(taskId) +
+                "&status=" +
+                encodeURIComponent(newStatus)
+
+        })
+
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error("Status konnte nicht geändert werden.");
+            }
+
+            return response.text();
+
+        })
+
+        .then(data => {
+
+            // Task in die neue Spalte verschieben
+            this.appendChild(draggedTask);
+
+            console.log(
+                "Task " +
+                taskId +
+                " wurde auf " +
+                newStatus +
+                " gesetzt."
+            );
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Fehler beim Statuswechsel:",
+                error
+            );
+
+            alert(
+                "Der Status konnte nicht geändert werden."
+            );
+
+        });
+
+
+        draggedTask = null;
+
+    });
+
+});
+
+</script>
+
 
 <?php require "../includes/footer.php"; ?>
