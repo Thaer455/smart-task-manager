@@ -9,25 +9,28 @@ class TaskController
         return Task::getAll($pdo, $search, $status);
     }
 
-    public static function updateStatus($pdo, $id, $status)
-    {
-        return Task::updateStatus($pdo, $id, $status);
-    }
     public static function create($pdo, $data)
     {
         return Task::create($pdo, $data);
     }
+
     public static function find($pdo, $id)
-{
-    return Task::find($pdo, $id);
-}
+    {
+        return Task::find($pdo, $id);
+    }
 
     public static function update($pdo, $id, $data)
-{
-    return Task::update($pdo, $id, $data);
-}
+    {
+        return Task::update($pdo, $id, $data);
+    }
+
+    public static function updateStatus($pdo, $id, $status)
+    {
+        return Task::updateStatus($pdo, $id, $status);
+    }
+
     public static function delete($pdo, $id)
-{
-    return Task::delete($pdo, $id);
-}
+    {
+        return Task::delete($pdo, $id);
+    }
 }
