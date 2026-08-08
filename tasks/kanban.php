@@ -17,27 +17,93 @@ $progressTasks = [];
 $doneTasks = [];
 
 foreach ($tasks as $task) {
-
     if ($task["status"] === "todo") {
         $todoTasks[] = $task;
-    }
-
-    elseif ($task["status"] === "progress") {
+    } elseif ($task["status"] === "progress") {
         $progressTasks[] = $task;
-    }
-
-    elseif ($task["status"] === "done") {
+    } elseif ($task["status"] === "done") {
         $doneTasks[] = $task;
     }
 }
 
 require "../includes/header.php";
 require "../includes/sidebar.php";
+
+
+// ==========================================
+// PRIORITÄT DARSTELLEN
+// ==========================================
+
+function priorityBadge($priority)
+{
+    switch ($priority) {
+
+        case "high":
+            return '<span class="badge bg-danger">🔴 Hoch</span>';
+
+        case "medium":
+            return '<span class="badge bg-warning text-dark">🟡 Mittel</span>';
+
+        case "low":
+        default:
+            return '<span class="badge bg-success">🟢 Niedrig</span>';
+    }
+}
+
+
+// ==========================================
+// DEADLINE DARSTELLEN
+// ==========================================
+
+function deadlineBadge($deadline, $status)
+{
+    if (empty($deadline)) {
+        return '<span class="text-muted">Keine Deadline</span>';
+    }
+
+    $today = new DateTime();
+    $deadlineDate = new DateTime($deadline);
+
+    // Nur offene Tasks können überfällig sein
+    if ($status !== "done" && $deadlineDate < $today) {
+
+        return '
+            <span class="badge bg-danger">
+                ⚠️ Überfällig: ' .
+                htmlspecialchars(date("d.m.Y", strtotime($deadline))) .
+            '</span>
+        ';
+    }
+
+    // Erledigte Tasks
+    if ($status === "done") {
+
+        return '
+            <span class="badge bg-success">
+                ✅ ' .
+                htmlspecialchars(date("d.m.Y", strtotime($deadline))) .
+            '</span>
+        ';
+    }
+
+    // Normale Deadline
+    return '
+        <span class="badge bg-secondary">
+            📅 ' .
+            htmlspecialchars(date("d.m.Y", strtotime($deadline))) .
+        '</span>
+    ';
+}
+
 ?>
 
 <div class="content">
 
     <div class="container-fluid py-5">
+
+        <!-- ==========================================
+             HEADER
+        =========================================== -->
 
         <div class="d-flex justify-content-between align-items-center mb-4">
 
@@ -55,76 +121,142 @@ require "../includes/sidebar.php";
 
             <a
                 href="create.php"
-                class="btn btn-primary">
-
+                class="btn btn-primary"
+            >
                 + Neue Task
-
             </a>
 
         </div>
 
 
+        <!-- ==========================================
+             KANBAN BOARD
+        =========================================== -->
+
         <div class="row g-4">
 
 
-            <!-- TODO -->
+            <!-- ======================================
+                 TODO
+            ======================================= -->
 
             <div class="col-md-4">
 
-                <div class="card shadow-sm border-0">
+                <div class="card shadow-sm border-0 h-100">
 
                     <div class="card-header bg-secondary text-white">
 
                         <h5 class="mb-0">
+
                             📝 Todo
+
+                            <span class="badge bg-light text-dark ms-2">
+                                <?= count($todoTasks) ?>
+                            </span>
+
                         </h5>
 
                     </div>
 
+
                     <div
                         class="card-body kanban-column"
-                        data-status="todo">
+                        data-status="todo"
+                    >
 
                         <?php foreach ($todoTasks as $task): ?>
 
                             <div
                                 class="card mb-3 shadow-sm kanban-task"
                                 draggable="true"
-                                data-id="<?= $task["id"] ?>">
+                                data-id="<?= htmlspecialchars($task["id"]) ?>"
+                            >
 
                                 <div class="card-body">
 
-                                    <h5 class="fw-bold">
+                                    <!-- Titel -->
+
+                                    <h5 class="fw-bold mb-2">
+
                                         <?= htmlspecialchars($task["title"]) ?>
+
                                     </h5>
 
-                                    <p class="text-muted mb-2">
-                                        <?= htmlspecialchars($task["description"] ?? "") ?>
-                                    </p>
 
-                                    <small>
-                                        Projekt:
-                                        <?= htmlspecialchars($task["project_title"] ?? "") ?>
-                                    </small>
+                                    <!-- Beschreibung -->
 
-                                    <br>
+                                    <?php if (!empty($task["description"])): ?>
 
-                                    <small>
-                                        Priorität:
-                                        <?= ucfirst($task["priority"] ?? "low") ?>
-                                    </small>
+                                        <p class="text-muted small mb-3">
 
-                                    <div class="mt-3">
+                                            <?= htmlspecialchars($task["description"]) ?>
 
-                                        <a
-                                            href="edit.php?id=<?= $task["id"] ?>"
-                                            class="btn btn-warning btn-sm">
+                                        </p>
 
-                                            Edit
+                                    <?php endif; ?>
 
-                                        </a>
+
+                                    <!-- Projekt -->
+
+                                    <div class="small mb-2">
+
+                                        📁
+
+                                        <strong>Projekt:</strong>
+
+                                        <?= htmlspecialchars(
+                                            $task["project_title"] ?? "Unbekannt"
+                                        ) ?>
 
                                     </div>
+
+
+                                    <!-- Benutzer -->
+
+                                    <div class="small mb-2">
+
+                                        👤
+
+                                        <strong>Zugewiesen:</strong>
+
+                                        <?= htmlspecialchars(
+                                            $task["assigned_user"] ?? "Nicht zugewiesen"
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Priorität -->
+
+                                    <div class="mb-2">
+
+                                        <?= priorityBadge(
+                                            $task["priority"] ?? "low"
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Deadline -->
+
+                                    <div class="mb-3">
+
+                                        <?= deadlineBadge(
+                                            $task["deadline"] ?? null,
+                                            $task["status"]
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Aktionen -->
+
+                                    <a
+                                        href="edit.php?id=<?= htmlspecialchars($task["id"]) ?>"
+                                        class="btn btn-warning btn-sm"
+                                    >
+                                        ✏️ Edit
+                                    </a>
 
                                 </div>
 
@@ -136,7 +268,9 @@ require "../includes/sidebar.php";
                         <?php if (empty($todoTasks)): ?>
 
                             <p class="text-muted text-center">
+
                                 Keine Tasks
+
                             </p>
 
                         <?php endif; ?>
@@ -148,64 +282,127 @@ require "../includes/sidebar.php";
             </div>
 
 
-            <!-- IN PROGRESS -->
+            <!-- ======================================
+                 IN PROGRESS
+            ======================================= -->
 
             <div class="col-md-4">
 
-                <div class="card shadow-sm border-0">
+                <div class="card shadow-sm border-0 h-100">
 
                     <div class="card-header bg-warning">
 
                         <h5 class="mb-0">
+
                             🔄 In Progress
+
+                            <span class="badge bg-light text-dark ms-2">
+                                <?= count($progressTasks) ?>
+                            </span>
+
                         </h5>
 
                     </div>
 
+
                     <div
                         class="card-body kanban-column"
-                        data-status="progress">
+                        data-status="progress"
+                    >
 
                         <?php foreach ($progressTasks as $task): ?>
 
                             <div
                                 class="card mb-3 shadow-sm kanban-task"
                                 draggable="true"
-                                data-id="<?= $task["id"] ?>">
+                                data-id="<?= htmlspecialchars($task["id"]) ?>"
+                            >
 
                                 <div class="card-body">
 
-                                    <h5 class="fw-bold">
+                                    <!-- Titel -->
+
+                                    <h5 class="fw-bold mb-2">
+
                                         <?= htmlspecialchars($task["title"]) ?>
+
                                     </h5>
 
-                                    <p class="text-muted mb-2">
-                                        <?= htmlspecialchars($task["description"] ?? "") ?>
-                                    </p>
 
-                                    <small>
-                                        Projekt:
-                                        <?= htmlspecialchars($task["project_title"] ?? "") ?>
-                                    </small>
+                                    <!-- Beschreibung -->
 
-                                    <br>
+                                    <?php if (!empty($task["description"])): ?>
 
-                                    <small>
-                                        Priorität:
-                                        <?= ucfirst($task["priority"] ?? "low") ?>
-                                    </small>
+                                        <p class="text-muted small mb-3">
 
-                                    <div class="mt-3">
+                                            <?= htmlspecialchars($task["description"]) ?>
 
-                                        <a
-                                            href="edit.php?id=<?= $task["id"] ?>"
-                                            class="btn btn-warning btn-sm">
+                                        </p>
 
-                                            Edit
+                                    <?php endif; ?>
 
-                                        </a>
+
+                                    <!-- Projekt -->
+
+                                    <div class="small mb-2">
+
+                                        📁
+
+                                        <strong>Projekt:</strong>
+
+                                        <?= htmlspecialchars(
+                                            $task["project_title"] ?? "Unbekannt"
+                                        ) ?>
 
                                     </div>
+
+
+                                    <!-- Benutzer -->
+
+                                    <div class="small mb-2">
+
+                                        👤
+
+                                        <strong>Zugewiesen:</strong>
+
+                                        <?= htmlspecialchars(
+                                            $task["assigned_user"] ?? "Nicht zugewiesen"
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Priorität -->
+
+                                    <div class="mb-2">
+
+                                        <?= priorityBadge(
+                                            $task["priority"] ?? "low"
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Deadline -->
+
+                                    <div class="mb-3">
+
+                                        <?= deadlineBadge(
+                                            $task["deadline"] ?? null,
+                                            $task["status"]
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Aktionen -->
+
+                                    <a
+                                        href="edit.php?id=<?= htmlspecialchars($task["id"]) ?>"
+                                        class="btn btn-warning btn-sm"
+                                    >
+                                        ✏️ Edit
+                                    </a>
 
                                 </div>
 
@@ -217,7 +414,9 @@ require "../includes/sidebar.php";
                         <?php if (empty($progressTasks)): ?>
 
                             <p class="text-muted text-center">
+
                                 Keine Tasks
+
                             </p>
 
                         <?php endif; ?>
@@ -229,64 +428,127 @@ require "../includes/sidebar.php";
             </div>
 
 
-            <!-- DONE -->
+            <!-- ======================================
+                 DONE
+            ======================================= -->
 
             <div class="col-md-4">
 
-                <div class="card shadow-sm border-0">
+                <div class="card shadow-sm border-0 h-100">
 
                     <div class="card-header bg-success text-white">
 
                         <h5 class="mb-0">
+
                             ✅ Done
+
+                            <span class="badge bg-light text-dark ms-2">
+                                <?= count($doneTasks) ?>
+                            </span>
+
                         </h5>
 
                     </div>
 
+
                     <div
                         class="card-body kanban-column"
-                        data-status="done">
+                        data-status="done"
+                    >
 
                         <?php foreach ($doneTasks as $task): ?>
 
                             <div
                                 class="card mb-3 shadow-sm kanban-task"
                                 draggable="true"
-                                data-id="<?= $task["id"] ?>">
+                                data-id="<?= htmlspecialchars($task["id"]) ?>"
+                            >
 
                                 <div class="card-body">
 
-                                    <h5 class="fw-bold">
+                                    <!-- Titel -->
+
+                                    <h5 class="fw-bold mb-2">
+
                                         <?= htmlspecialchars($task["title"]) ?>
+
                                     </h5>
 
-                                    <p class="text-muted mb-2">
-                                        <?= htmlspecialchars($task["description"] ?? "") ?>
-                                    </p>
 
-                                    <small>
-                                        Projekt:
-                                        <?= htmlspecialchars($task["project_title"] ?? "") ?>
-                                    </small>
+                                    <!-- Beschreibung -->
 
-                                    <br>
+                                    <?php if (!empty($task["description"])): ?>
 
-                                    <small>
-                                        Priorität:
-                                        <?= ucfirst($task["priority"] ?? "low") ?>
-                                    </small>
+                                        <p class="text-muted small mb-3">
 
-                                    <div class="mt-3">
+                                            <?= htmlspecialchars($task["description"]) ?>
 
-                                        <a
-                                            href="edit.php?id=<?= $task["id"] ?>"
-                                            class="btn btn-warning btn-sm">
+                                        </p>
 
-                                            Edit
+                                    <?php endif; ?>
 
-                                        </a>
+
+                                    <!-- Projekt -->
+
+                                    <div class="small mb-2">
+
+                                        📁
+
+                                        <strong>Projekt:</strong>
+
+                                        <?= htmlspecialchars(
+                                            $task["project_title"] ?? "Unbekannt"
+                                        ) ?>
 
                                     </div>
+
+
+                                    <!-- Benutzer -->
+
+                                    <div class="small mb-2">
+
+                                        👤
+
+                                        <strong>Zugewiesen:</strong>
+
+                                        <?= htmlspecialchars(
+                                            $task["assigned_user"] ?? "Nicht zugewiesen"
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Priorität -->
+
+                                    <div class="mb-2">
+
+                                        <?= priorityBadge(
+                                            $task["priority"] ?? "low"
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Deadline -->
+
+                                    <div class="mb-3">
+
+                                        <?= deadlineBadge(
+                                            $task["deadline"] ?? null,
+                                            $task["status"]
+                                        ) ?>
+
+                                    </div>
+
+
+                                    <!-- Aktionen -->
+
+                                    <a
+                                        href="edit.php?id=<?= htmlspecialchars($task["id"]) ?>"
+                                        class="btn btn-warning btn-sm"
+                                    >
+                                        ✏️ Edit
+                                    </a>
 
                                 </div>
 
@@ -298,7 +560,9 @@ require "../includes/sidebar.php";
                         <?php if (empty($doneTasks)): ?>
 
                             <p class="text-muted text-center">
+
                                 Keine Tasks
+
                             </p>
 
                         <?php endif; ?>
@@ -316,135 +580,157 @@ require "../includes/sidebar.php";
 </div>
 
 
+<!-- ==========================================
+     KANBAN JAVASCRIPT
+=========================================== -->
+
 <script>
 
 let draggedTask = null;
 
 
-// Task wird gezogen
-document.querySelectorAll(".kanban-task").forEach(task => {
+// ==========================================
+// TASK ZIEHEN
+// ==========================================
 
-    task.addEventListener("dragstart", function () {
+document
+    .querySelectorAll(".kanban-task")
+    .forEach(task => {
 
-        draggedTask = this;
+        task.addEventListener("dragstart", function () {
 
-        this.classList.add("opacity-50");
+            draggedTask = this;
 
-    });
-
-
-    task.addEventListener("dragend", function () {
-
-        this.classList.remove("opacity-50");
-
-    });
-
-});
-
-
-// Kanban-Spalten
-document.querySelectorAll(".kanban-column").forEach(column => {
-
-
-    // Erlaubt das Ablegen
-    column.addEventListener("dragover", function (event) {
-
-        event.preventDefault();
-
-        this.classList.add("bg-light");
-
-    });
-
-
-    // Highlight entfernen
-    column.addEventListener("dragleave", function () {
-
-        this.classList.remove("bg-light");
-
-    });
-
-
-    // Task ablegen
-    column.addEventListener("drop", function (event) {
-
-        event.preventDefault();
-
-        this.classList.remove("bg-light");
-
-
-        if (!draggedTask) {
-            return;
-        }
-
-
-        let taskId = draggedTask.dataset.id;
-
-        let newStatus = this.dataset.status;
-
-
-        fetch("update_status.php", {
-
-            method: "POST",
-
-            headers: {
-
-                "Content-Type":
-                    "application/x-www-form-urlencoded"
-
-            },
-
-            body:
-                "task_id=" +
-                encodeURIComponent(taskId) +
-                "&status=" +
-                encodeURIComponent(newStatus)
-
-        })
-
-        .then(response => {
-
-            if (!response.ok) {
-                throw new Error("Status konnte nicht geändert werden.");
-            }
-
-            return response.text();
-
-        })
-
-        .then(data => {
-
-            // Task in die neue Spalte verschieben
-            this.appendChild(draggedTask);
-
-            console.log(
-                "Task " +
-                taskId +
-                " wurde auf " +
-                newStatus +
-                " gesetzt."
-            );
-
-        })
-
-        .catch(error => {
-
-            console.error(
-                "Fehler beim Statuswechsel:",
-                error
-            );
-
-            alert(
-                "Der Status konnte nicht geändert werden."
-            );
+            this.classList.add("opacity-50");
 
         });
 
 
-        draggedTask = null;
+        task.addEventListener("dragend", function () {
+
+            this.classList.remove("opacity-50");
+
+        });
 
     });
 
-});
+
+// ==========================================
+// KANBAN-SPALTEN
+// ==========================================
+
+document
+    .querySelectorAll(".kanban-column")
+    .forEach(column => {
+
+
+        // Drag über Spalte
+
+        column.addEventListener("dragover", function (event) {
+
+            event.preventDefault();
+
+            this.classList.add("bg-light");
+
+        });
+
+
+        // Drag verlässt Spalte
+
+        column.addEventListener("dragleave", function () {
+
+            this.classList.remove("bg-light");
+
+        });
+
+
+        // Task wird abgelegt
+
+        column.addEventListener("drop", function (event) {
+
+            event.preventDefault();
+
+            this.classList.remove("bg-light");
+
+
+            if (!draggedTask) {
+                return;
+            }
+
+
+            const taskId =
+                draggedTask.dataset.id;
+
+            const newStatus =
+                this.dataset.status;
+
+
+            fetch("update_status.php", {
+
+                method: "POST",
+
+                headers: {
+
+                    "Content-Type":
+                        "application/x-www-form-urlencoded"
+
+                },
+
+                body:
+                    "task_id=" +
+                    encodeURIComponent(taskId) +
+                    "&status=" +
+                    encodeURIComponent(newStatus)
+
+            })
+
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Status konnte nicht geändert werden."
+                    );
+
+                }
+
+                return response.text();
+
+            })
+
+            .then(() => {
+
+                this.appendChild(draggedTask);
+
+                console.log(
+                    "Task " +
+                    taskId +
+                    " wurde auf " +
+                    newStatus +
+                    " gesetzt."
+                );
+
+            })
+
+            .catch(error => {
+
+                console.error(
+                    "Fehler beim Statuswechsel:",
+                    error
+                );
+
+                alert(
+                    "Der Status konnte nicht geändert werden."
+                );
+
+            });
+
+
+            draggedTask = null;
+
+        });
+
+    });
 
 </script>
 
