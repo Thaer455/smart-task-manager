@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Task Manager - Interactive Demo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root{--p:#4f46e5;--bg:#f5f7fb;--card:#fff;--text:#172033;--muted:#697386;--border:#e5e7eb}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+        button,input,select,textarea{font:inherit}
+        
+        /* Layout */
+        .sidebar{position:fixed;width:245px;inset:0 auto 0 0;background:var(--card);border-right:1px solid var(--border);padding:24px 14px;z-index:5;transition:transform .3s}
+        .brand{font-size:20px;font-weight:800;padding:0 12px 28px}
+        .brand i{color:var(--p);margin-right:8px}
+        .brand small{display:block;color:var(--muted);font-size:10px;margin:4px 0 0 32px}
+        .nav-item{display:block;width:100%;border:0;background:none;text-align:left;padding:12px;border-radius:9px;color:var(--muted);font-weight:600;cursor:pointer;margin:3px 0;transition:all .2s}
+        .nav-item i{width:24px;display:inline-block}
+        .nav-item.active,.nav-item:hover{background:#eef0ff;color:var(--p)}
+        .sidebar-footer{position:absolute;bottom:20px;left:14px;right:14px;color:var(--muted);font-size:11px}
+        .user{display:flex;gap:10px;align-items:center;padding:10px;background:var(--bg);border-radius:10px}
+        .avatar{background:var(--p);color:#fff;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px}
+        .user span{display:block;font-size:10px}
+        .main{margin-left:245px;min-height:100vh}
+        .topbar{height:65px;background:var(--card);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;padding:0 28px;position:sticky;top:0;z-index:4}
+        .top-actions{display:flex;gap:8px}
+        .icon-btn{border:0;background:none;padding:9px;border-radius:8px;cursor:pointer;font-size:18px}
+        .icon-btn:hover{background:var(--bg)}
+        .menu{display:none}
+        .content{padding:30px;max-width:1450px;margin:auto}
+        
+        /* Pages */
+        .page{display:none}
+        .page.active{display:block}
+        
+        /* Page Header */
+        .page-head{display:flex;justify-content:space-between;gap:15px;margin-bottom:25px;flex-wrap:wrap}
+        .page-head h1{margin:0 0 5px;font-size:27px}
+        .page-head p{margin:0;color:var(--muted);font-size:13px}
+        .actions{display:flex;gap:8px;align-items:center}
+        
+        /* Buttons */
+        .btn{border:0;border-radius:8px;padding:9px 13px;cursor:pointer;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+        .btn:hover{transform:translateY(-2px)}
+        .primary{background:var(--p);color:#fff}
+        .success{background:#16a34a;color:#fff}
+        .danger{background:#fee2e2;color:#b91c1c}
+        .secondary{background:var(--bg);color:var(--text)}
+        .warning{background:#f59e0b;color:#fff}
+        
+        /* Stats */
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:22px}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 7px 22px #1e293b0a}
+        .stat{padding:20px;display:flex;gap:14px;align-items:center;border-left:4px solid var(--p)}
+        .stat i{font-size:23px;color:var(--p)}
+        .stat strong{font-size:27px;display:block}
+        .stat span{font-size:11px;color:var(--muted)}
+        
+        /* Grid */
+        .grid2{display:grid;grid-template-columns:1.35fr .8fr;gap:20px}
+        .card-head{padding:17px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .card-head h3{font-size:14px;margin:0}
+        .link{border:0;background:none;color:var(--p);font-weight:600;cursor:pointer}
+        .list{padding:5px 20px}
+        .list-row{padding:14px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px}
+        .list-row:last-child{border:0}
+        .list-row strong{font-size:12px}
+        .list-row small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+        
+        /* Badges */
+        .badge{font-size:10px;font-weight:700;border-radius:20px;padding:5px 8px;white-space:nowrap}
+        .todo{background:#e2e8f0;color:#475569}
+        .progress{background:#fef3c7;color:#92400e}
+        .done{background:#dcfce7;color:#166534}
+        .high{background:#fee2e2;color:#b91c1c}
+        .medium{background:#fef3c7;color:#92400e}
+        .low{background:#dcfce7;color:#166534}
+        
+        /* Chart */
+        .chart{min-height:280px;display:grid;place-items:center;padding:20px}
+        .donut{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--p) 0 35%,#f59e0b 35% 62%,#22c55e 62%);position:relative}
+        .donut:after{content:'';position:absolute;inset:35px;background:var(--card);border-radius:50%}
+        .legend{margin-top:15px;color:var(--muted);font-size:10px;text-align:center}
+        
+        /* Projects Grid */
+        .project-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+        .project{padding:20px}
+        .project-icon{width:43px;height:43px;border-radius:10px;background:#eef0ff;color:var(--p);display:grid;place-items:center;font-size:20px;margin-bottom:12px}
+        .project h3{font-size:15px;margin-bottom:8px}
+        .project p{font-size:11px;color:var(--muted);line-height:1.6;min-height:35px}
+        .meta{font-size:10px;color:var(--muted);display:flex;gap:14px;margin:15px 0;flex-wrap:wrap}
+        .mini{font-size:10px;padding:7px 9px}
+        
+        /* Toolbar */
+        .toolbar{display:flex;gap:9px;margin-bottom:15px;flex-wrap:wrap}
+        .input{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);outline:0;flex:1}
+        .search{min-width:260px}
+        
+        /* Kanban */
+        .kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+        .column{background:#eaf0f7;border-radius:12px;padding:12px;min-height:470px}
+        .column-head{display:flex;justify-content:space-between;font-size:13px;padding:4px;margin-bottom:12px;font-weight:700}
+        .task{background:var(--card);padding:14px;border-radius:10px;border:1px solid var(--border);margin:9px 0;cursor:grab;transition:all .2s}
+        .task:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.1)}
+        .task h4{font-size:12px;margin:0 0 7px}
+        .task p{font-size:10px;color:var(--muted);line-height:1.5}
+        .task-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:6px;flex-wrap:wrap}
+        .deadline{font-size:9px;color:var(--muted)}
+        
+        /* Profile */
+        .profile{max-width:700px}
+        .profile-box{display:flex;gap:16px;align-items:center;border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:20px}
+        .profile .avatar{width:65px;height:65px;font-size:24px}
+        .profile h2{margin:0 0 5px;font-size:22px}
+        .profile p{margin:0;color:var(--muted);font-size:11px}
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}
+        .info{background:var(--bg);padding:13px;border-radius:8px}
+        .info span{display:block;color:var(--muted);font-size:9px}
+        .info strong{font-size:11px}
+        
+        /* Forms */
+        .form-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+        .form-section h3{font-size:16px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+        .form-group{margin-bottom:16px}
+        .form-group label{display:block;font-size:11px;font-weight:700;margin-bottom:6px;color:var(--text)}
+        .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);outline:0}
+        .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--p)}
+        .form-group textarea{min-height:80px;resize:vertical}
+        
+        /* Modal */
+        .modal-backdrop{position:fixed;inset:0;background:#0f172a88;display:none;place-items:center;z-index:20;padding:20px}
+        .modal-backdrop.show{display:grid}
+        .modal{background:var(--card);padding:22px;border-radius:13px;width:min(590px,100%);max-height:90vh;overflow-y:auto}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+        .modal h2{font-size:18px;margin:0}
+        .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}
+        
+        /* Toast */
+        .toast{position:fixed;bottom:20px;right:20px;background:#111827;color:white;padding:11px 15px;border-radius:8px;font-size:11px;opacity:0;transition:.3s;z-index:30;transform:translateY(20px)}
+        .toast.show{opacity:1;transform:translateY(0)}
+        
+        /* Empty State */
+        .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+        .empty-state i{font-size:48px;opacity:.3;margin-bottom:12px;display:block}
+        .empty-state p{font-size:13px;margin-bottom:16px}
+        
+        /* Login Page */
+        .login-page{min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:20px}
+        .login-card{background:var(--card);padding:40px;border-radius:16px;width:min(420px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+        .login-card h1{text-align:center;font-size:28px;margin-bottom:8px}
+        .login-card p{text-align:center;color:var(--muted);font-size:13px;margin-bottom:30px}
+        .login-card .btn{width:100%;justify-content:center;padding:12px;margin-top:10px}
+        
+        /* Dark Mode */
+        .dark{--bg:#0f172a;--card:#172033;--text:#e8edf7;--muted:#9aa6b8;--border:#293449}
+        .dark .nav-item.active,.dark .nav-item:hover{background:#222d48}
+        .dark .column{background:#111a2c}
+        .dark .info{background:#111a2c}
+        .dark .danger{background:#3a2024}
+        
+        /* Responsive */
+        @media(max-width:950px){
+            .stats{grid-template-columns:1fr 1fr}
+            .grid2{grid-template-columns:1fr}
+            .project-grid{grid-template-columns:1fr 1fr}
+            .kanban{grid-template-columns:1fr}
+        }
+        @media(max-width:700px){
+            .sidebar{transform:translateX(-100%);width:270px}
+            .sidebar.open{transform:none}
+            .main{margin-left:0}
+            .menu{display:inline-block}
+            .topbar{padding:0 15px}
+            .content{padding:20px 15px}
+            .page-head{flex-direction:column}
+            .stats{gap:10px}
+            .project-grid{grid-template-columns:1fr}
+            .kanban{grid-template-columns:1fr}
+            .column{min-height:220px}
+            .sidebar-overlay{display:none;position:fixed;inset:0;background:#0006;z-index:4}
+            .sidebar-overlay.show{display:block}
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-page">
+    <div class="login-card">
+        <h1>🚀 Smart Task</h1>
+        <p>Melde dich an, um deine Aufgaben zu verwalten</p>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>E-Mail</label>
+                <input type="email" id="loginEmail" value="demo@smarttask.com" required>
+            </div>
+            <div class="form-group">
+                <label>Passwort</label>
+                <input type="password" id="loginPassword" value="demo123" required>
+            </div>
+            <button type="submit" class="btn primary">Anmelden</button>
+        </form>
+        <p style="text-align:center;margin-top:20px;font-size:11px;color:var(--muted)">
+            Demo: demo@smarttask.com / demo123
+        </p>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="brand"><i>🚀</i> Smart Task<small>Manager Demo</small></div>
+        
+        <button class="nav-item active" data-page="dashboard"><i>📊</i> Dashboard</button>
+        <button class="nav-item" data-page="projects"><i>📁</i> Projekte</button>
+        <button class="nav-item" data-page="tasks"><i>✅</i> Aufgaben</button>
+        <button class="nav-item" data-page="kanban"><i></i> Kanban Board</button>
+        <button class="nav-item" data-page="profile"><i>👤</i> Profil</button>
+        
+        <div class="sidebar-footer">
+            <div class="user">
+                <div class="avatar" id="userAvatar">D</div>
+                <div>
+                    <div id="userName">Demo User</div>
+                    <span>● Online</span>
+                </div>
+            </div>
+            <button class="nav-item" onclick="logout()" style="margin-top:10px"><i>🚪</i> Abmelden</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Topbar -->
+        <header class="topbar">
+            <button class="icon-btn menu" onclick="toggleSidebar()">☰</button>
+            <div class="top-actions">
+                <button class="icon-btn" onclick="toggleDarkMode()" title="Dark Mode">🌙</button>
+                <button class="btn danger mini" onclick="logout()"><i>🚪</i></button>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <div class="content">
+            
+            <!-- DASHBOARD PAGE -->
+            <div id="dashboard" class="page active">
+                <div class="page-head">
+                    <div>
+                        <h1>Willkommen zurück, <span id="welcomeName">Demo</span> 👋</h1>
+                        <p>Hier ist eine Übersicht über deine aktuellen Aufgaben.</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn primary" onclick="showPage('projects');openProjectModal()"><i></i> Neues Projekt</button>
+                        <button class="btn success" onclick="showPage('tasks');openTaskModal()"><i>+</i> Neuer Task</button>
+                    </div>
+                </div>
+
+                <div class="stats" id="statsContainer">
+                    <!-- Stats werden per JS gefüllt -->
+                </div>
+
+                <div class="grid2">
+                    <div>
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i>📁</i> Letzte Projekte</h3>
+                                <button class="link" onclick="showPage('projects')">Alle ansehen</button>
+                            </div>
+                            <div class="list" id="recentProjects">
+                                <!-- Wird per JS gefüllt -->
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-top:18px">
+                            <div class="card-head">
+                                <h3><i>✅</i> Letzte Tasks</h3>
+                                <button class="link" onclick="showPage('tasks')">Alle ansehen</button>
+                            </div>
+                            <div class="list" id="recentTasks">
+                                <!-- Wird per JS gefüllt -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="card">
+                            <div class="card-head">
+                                <h3><i>📊</i> Status Übersicht</h3>
+                            </div>
+                            <div class="chart">
+                                <div class="donut" id="donutChart"></div>
+                            </div>
+                            <div class="legend" id="chartLegend">
+                                <!-- Wird per JS gefüllt -->
+                            </div>
+                            <p style="text-align:center;color:var(--muted);font-size:11px;margin-top:15px" id="chartFooter">
+                                <!-- Wird per JS gefüllt -->
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROJECTS PAGE -->
+            <div id="projects" class="page">
+                <div class="page-head">
+                    <div>
+                        <h1>📁 Projekte</h1>
+                        <p>Verwalte alle deine Projekte an einem Ort</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn primary" onclick="openProjectModal()"><i>+</i> Neues Projekt</button>
+                    </div>
+                </div>
+
+                <div class="project-grid" id="projectsGrid">
+                    <!-- Wird per JS gefüllt -->
+                </div>
+            </div>
+
+            <!-- TASKS PAGE -->
+            <div id="tasks" class="page">
+                <div class="page-head">
+                    <div>
+                        <h1>✅ Aufgaben</h1>
+                        <p>Verwalte alle deine Tasks</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn primary" onclick="openTaskModal()"><i>+</i> Neuer Task</button>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <input type="text" class="input search" id="taskSearch" placeholder="Task suchen..." oninput="renderTasks()">
+                    <select class="input" id="taskFilter" onchange="renderTasks()" style="max-width:200px">
+                        <option value="">Alle Status</option>
+                        <option value="todo">Todo</option>
+                        <option value="progress">In Arbeit</option>
+                        <option value="done">Erledigt</option>
+                    </select>
+                </div>
+
+                <div id="tasksList">
+                    <!-- Wird per JS gefüllt -->
+                </div>
+            </div>
+
+            <!-- KANBAN PAGE -->
+            <div id="kanban" class="page">
+                <div class="page-head">
+                    <div>
+                        <h1> Kanban Board</h1>
+                        <p>Ziehe Tasks zwischen den Spalten</p>
+                    </div>
+                    <div class="actions">
+                        <button class="btn primary" onclick="openTaskModal()"><i>+</i> Neuer Task</button>
+                    </div>
+                </div>
+
+                <div class="kanban" id="kanbanBoard">
+                    <!-- Wird per JS gefüllt -->
+                </div>
+            </div>
+
+            <!-- PROFILE PAGE -->
+            <div id="profile" class="page">
+                <div class="page-head">
+                    <div>
+                        <h1>👤 Mein Profil</h1>
+                        <p>Verwalte deine persönlichen Einstellungen</p>
+                    </div>
+                </div>
+
+                <div class="profile">
+                    <div class="card profile-box">
+                        <div class="avatar" id="profileAvatar">D</div>
+                        <div>
+                            <h2 id="profileName">Demo User</h2>
+                            <p id="profileEmail">demo@smarttask.com</p>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Profil bearbeiten</h3>
+                        <form id="profileForm">
+                            <div class="form-group">
+                                <label>Benutzername</label>
+                                <input type="text" id="profileUsername" required>
+                            </div>
+                            <div class="form-group">
+                                <label>E-Mail</label>
+                                <input type="email" id="profileEmailInput" required>
+                            </div>
+                            <button type="submit" class="btn primary">Änderungen speichern</button>
+                        </form>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info">
+                            <span>Mitglied seit</span>
+                            <strong id="memberSince">12.09.2026</strong>
+                        </div>
+                        <div class="info">
+                            <span>Aufgaben erstellt</span>
+                            <strong id="tasksCreated">0</strong>
+                        </div>
+                        <div class="info">
+                            <span>Projekte erstellt</span>
+                            <strong id="projectsCreated">0</strong>
+                        </div>
+                        <div class="info">
+                            <span>Aufgaben erledigt</span>
+                            <strong id="tasksDone">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- Project Modal -->
+    <div class="modal-backdrop" id="projectModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h2 id="projectModalTitle">Neues Projekt</h2>
+                <button class="icon-btn" onclick="closeProjectModal()">✕</button>
+            </div>
+            <form id="projectForm">
+                <input type="hidden" id="projectId">
+                <div class="form-group">
+                    <label>Titel *</label>
+                    <input type="text" id="projectTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <textarea id="projectDescription"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary" onclick="closeProjectModal()">Abbrechen</button>
+                    <button type="submit" class="btn primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal-backdrop" id="taskModal">
+        <div class="modal">
+            <div class="modal-head">
+                <h2 id="taskModalTitle">Neuer Task</h2>
+                <button class="icon-btn" onclick="closeTaskModal()">✕</button>
+            </div>
+            <form id="taskForm">
+                <input type="hidden" id="taskId">
+                <div class="form-group">
+                    <label>Titel *</label>
+                    <input type="text" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <textarea id="taskDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Projekt *</label>
+                    <select id="taskProject" required>
+                        <option value="">Projekt auswählen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="taskStatus">
+                        <option value="todo">Todo</option>
+                        <option value="progress">In Arbeit</option>
+                        <option value="done">Erledigt</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priorität</label>
+                    <select id="taskPriority">
+                        <option value="low">Niedrig</option>
+                        <option value="medium" selected>Mittel</option>
+                        <option value="high">Hoch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Deadline</label>
+                    <input type="date" id="taskDeadline">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn secondary" onclick="closeTaskModal()">Abbrechen</button>
+                    <button type="submit" class="btn primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+</div>
+
+<script>
+// ============ DATEN ============
+let currentUser = null;
+let projects = [];
+let tasks = [];
+
+// Demo-Daten initialisieren
+function initDemoData() {
+    const saved = localStorage.getItem('stm_demo_data');
+    if (saved) {
+        const data = JSON.parse(saved);
+        projects = data.projects || [];
+        tasks = data.tasks || [];
+    } else {
+        // Standard Demo-Daten
+        projects = [
+            { id: 1, title: 'Website Relaunch 2024', description: 'Komplette Neugestaltung der Firmenwebsite', created_at: '2024-01-15' },
+            { id: 2, title: 'Mobile App Entwicklung', description: 'iOS und Android App für Kunden', created_at: '2024-01-12' },
+            { id: 3, title: 'Marketing Kampagne Q1', description: 'Social Media und Email Marketing', created_at: '2024-01-08' }
+        ];
+        tasks = [
+            { id: 1, title: 'Homepage Design finalisieren', description: 'UI/UX Design für die neue Homepage', project_id: 1, status: 'progress', priority: 'high', deadline: '2026-02-25', created_at: '2024-01-20' },
+            { id: 2, title: 'Datenbank optimieren', description: 'Performance verbessern', project_id: 2, status: 'todo', priority: 'medium', deadline: '2026-02-20', created_at: '2024-01-18' },
+            { id: 3, title: 'API Dokumentation', description: 'REST API docs schreiben', project_id: 2, status: 'done', priority: 'low', deadline: '2026-02-18', created_at: '2024-01-15' },
+            { id: 4, title: 'Unit Tests schreiben', description: 'Testabdeckung erhöhen', project_id: 1, status: 'todo', priority: 'high', deadline: '2026-02-15', created_at: '2024-01-14' },
+            { id: 5, title: 'Social Media Posts erstellen', description: 'Content für Instagram und LinkedIn', project_id: 3, status: 'progress', priority: 'medium', deadline: '2026-02-28', created_at: '2024-01-12' }
+        ];
+        saveData();
+    }
+}
+
+function saveData() {
+    localStorage.setItem('stm_demo_data', JSON.stringify({ projects, tasks }));
+}
+
+// ============ AUTH ============
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    if (email && password) {
+        currentUser = {
+            id: 1,
+            username: 'Demo User',
+            email: email,
+            created_at: '2026-09-12'
+        };
+        localStorage.setItem('stm_user', JSON.stringify(currentUser));
+        showApp();
+        showToast('Erfolgreich angemeldet! ');
+    }
+});
+
+function logout() {
+    localStorage.removeItem('stm_user');
+    currentUser = null;
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'grid';
+    showToast('Abgemeldet');
+}
+
+function showApp() {
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    updateUserInfo();
+    renderAll();
+}
+
+function updateUserInfo() {
+    if (currentUser) {
+        const initial = currentUser.username.charAt(0).toUpperCase();
+        document.getElementById('userAvatar').textContent = initial;
+        document.getElementById('userName').textContent = currentUser.username;
+        document.getElementById('welcomeName').textContent = currentUser.username.split(' ')[0];
+        document.getElementById('profileAvatar').textContent = initial;
+        document.getElementById('profileName').textContent = currentUser.username;
+        document.getElementById('profileEmail').textContent = currentUser.email;
+        document.getElementById('profileUsername').value = currentUser.username;
+        document.getElementById('profileEmailInput').value = currentUser.email;
+        document.getElementById('memberSince').textContent = new Date(currentUser.created_at).toLocaleDateString('de-DE');
+    }
+}
+
+// ============ NAVIGATION ============
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelector(`[data-page="${pageId}"]`)?.classList.add('active');
+    renderAll();
+    if (window.innerWidth <= 700) {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('show');
+    }
+}
+
+document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        showPage(this.dataset.page);
+    });
+});
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('show');
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('stm_dark', document.body.classList.contains('dark'));
+}
+
+if (localStorage.getItem('stm_dark') === 'true') {
+    document.body.classList.add('dark');
+}
+
+// ============ RENDERING ============
+function renderAll() {
+    renderStats();
+    renderRecentProjects();
+    renderRecentTasks();
+    renderProjects();
+    renderTasks();
+    renderKanban();
+    renderProfileStats();
+}
+
+function renderStats() {
+    const totalProjects = projects.length;
+    const totalTasks = tasks.length;
+    const openTasks = tasks.filter(t => t.status !== 'done').length;
+    const doneTasks = tasks.filter(t => t.status === 'done').length;
+    
+    document.getElementById('statsContainer').innerHTML = `
+        <div class="card stat">
+            <i></i>
+            <div><strong>${totalProjects}</strong><span>PROJEKTE</span></div>
+        </div>
+        <div class="card stat" style="border-left-color:#764ba2">
+            <i style="color:#764ba2">✅</i>
+            <div><strong>${totalTasks}</strong><span>GESAMT TASKS</span></div>
+        </div>
+        <div class="card stat" style="border-left-color:#f59e0b">
+            <i style="color:#f59e0b">⏳</i>
+            <div><strong>${openTasks}</strong><span>IN BEARBEITUNG</span></div>
+        </div>
+        <div class="card stat" style="border-left-color:#22c55e">
+            <i style="color:#22c55e">✓</i>
+            <div><strong>${doneTasks}</strong><span>ERLEDIGT</span></div>
+        </div>
+    `;
+}
+
+function renderRecentProjects() {
+    const recent = projects.slice(0, 3);
+    const container = document.getElementById('recentProjects');
+    
+    if (recent.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i>📁</i><p>Noch keine Projekte</p></div>';
+        return;
+    }
+    
+    container.innerHTML = recent.map(p => `
+        <div class="list-row">
+            <div>
+                <strong>${p.title}</strong>
+                <small>📅 ${new Date(p.created_at).toLocaleDateString('de-DE')}</small>
+            </div>
+            <i style="color:var(--muted)">›</i>
+        </div>
+    `).join('');
+}
+
+function renderRecentTasks() {
+    const recent = tasks.slice(0, 4);
+    const container = document.getElementById('recentTasks');
+    
+    if (recent.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i>✅</i><p>Noch keine Tasks</p></div>';
+        return;
+    }
+    
+    container.innerHTML = recent.map(t => {
+        const statusClass = t.status;
+        const statusText = t.status === 'todo' ? 'Todo' : t.status === 'progress' ? 'In Arbeit' : 'Erledigt';
+        return `
+            <div class="list-row">
+                <div>
+                    <strong>${t.title}</strong>
+                    <small>📅 ${t.deadline ? new Date(t.deadline).toLocaleDateString('de-DE') : 'Keine Deadline'}</small>
+                </div>
+                <span class="badge ${statusClass}">${statusText}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderProjects() {
+    const container = document.getElementById('projectsGrid');
+    
+    if (projects.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i></i><p>Noch keine Projekte vorhanden</p><button class="btn primary" onclick="openProjectModal()">Erstes Projekt erstellen</button></div>';
+        return;
+    }
+    
+    container.innerHTML = projects.map(p => {
+        const taskCount = tasks.filter(t => t.project_id === p.id).length;
+        return `
+            <div class="card project">
+                <div class="project-icon">📁</div>
+                <h3>${p.title}</h3>
+                <p>${p.description || 'Keine Beschreibung'}</p>
+                <div class="meta">
+                    <span>📋 ${taskCount} Tasks</span>
+                    <span>📅 ${new Date(p.created_at).toLocaleDateString('de-DE')}</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:12px">
+                    <button class="btn secondary mini" onclick="editProject(${p.id})">Bearbeiten</button>
+                    <button class="btn danger mini" onclick="deleteProject(${p.id})">Löschen</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderTasks() {
+    const search = document.getElementById('taskSearch').value.toLowerCase();
+    const filter = document.getElementById('taskFilter').value;
+    
+    let filtered = tasks.filter(t => {
+        const matchSearch = t.title.toLowerCase().includes(search) || t.description.toLowerCase().includes(search);
+        const matchFilter = !filter || t.status === filter;
+        return matchSearch && matchFilter;
+    });
+    
+    const container = document.getElementById('tasksList');
+    
+    if (filtered.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i>✅</i><p>Keine Tasks gefunden</p></div>';
+        return;
+    }
+    
+    container.innerHTML = filtered.map(t => {
+        const project = projects.find(p => p.id === t.project_id);
+        const statusClass = t.status;
+        const statusText = t.status === 'todo' ? 'Todo' : t.status === 'progress' ? 'In Arbeit' : 'Erledigt';
+        const priorityClass = t.priority;
+        const priorityText = t.priority === 'low' ? 'Niedrig' : t.priority === 'medium' ? 'Mittel' : 'Hoch';
+        
+        return `
+            <div class="card" style="margin-bottom:12px;padding:20px">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+                    <h3 style="font-size:16px;margin:0">${t.title}</h3>
+                    <div style="display:flex;gap:6px">
+                        <span class="badge ${statusClass}">${statusText}</span>
+                        <span class="badge ${priorityClass}">${priorityText}</span>
+                    </div>
+                </div>
+                ${t.description ? `<p style="font-size:12px;color:var(--muted);margin-bottom:12px">${t.description}</p>` : ''}
+                <div class="meta">
+                    <span>📁 ${project ? project.title : 'Kein Projekt'}</span>
+                    <span>📅 ${t.deadline ? new Date(t.deadline).toLocaleDateString('de-DE') : 'Keine Deadline'}</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:12px">
+                    <button class="btn secondary mini" onclick="editTask(${t.id})">Bearbeiten</button>
+                    <button class="btn danger mini" onclick="deleteTask(${t.id})">Löschen</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderKanban() {
+    const columns = ['todo', 'progress', 'done'];
+    const columnNames = { todo: '📝 Todo', progress: '⏳ In Arbeit', done: '✅ Erledigt' };
+    const container = document.getElementById('kanbanBoard');
+    
+    container.innerHTML = columns.map(status => {
+        const columnTasks = tasks.filter(t => t.status === status);
+        return `
+            <div class="column" data-status="${status}" ondrop="dropTask(event, '${status}')" ondragover="allowDrop(event)">
+                <div class="column-head">
+                    <span>${columnNames[status]}</span>
+                    <span class="badge secondary">${columnTasks.length}</span>
+                </div>
+                ${columnTasks.length === 0 ? '<div class="empty-state" style="padding:30px 10px"><i>📋</i><p>Keine Tasks</p></div>' : ''}
+                ${columnTasks.map(t => `
+                    <div class="task" draggable="true" ondragstart="dragTask(event, ${t.id})" data-id="${t.id}">
+                        <h4>${t.title}</h4>
+                        ${t.description ? `<p>${t.description.substring(0, 60)}${t.description.length > 60 ? '...' : ''}</p>` : ''}
+                        <div class="task-meta">
+                            <span class="badge ${t.priority}">${t.priority === 'low' ? 'Niedrig' : t.priority === 'medium' ? 'Mittel' : 'Hoch'}</span>
+                            ${t.deadline ? `<span class="deadline">📅 ${new Date(t.deadline).toLocaleDateString('de-DE')}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }).join('');
+}
+
+function renderProfileStats() {
+    document.getElementById('tasksCreated').textContent = tasks.length;
+    document.getElementById('projectsCreated').textContent = projects.length;
+    document.getElementById('tasksDone').textContent = tasks.filter(t => t.status === 'done').length;
+}
+
+// ============ DRAG & DROP ============
+let draggedTaskId = null;
+
+function dragTask(event, taskId) {
+    draggedTaskId = taskId;
+    event.dataTransfer.effectAllowed = 'move';
+}
+
+function allowDrop(event) {
+    event.preventDefault();
+}
+
+function dropTask(event, newStatus) {
+    event.preventDefault();
+    if (draggedTaskId !== null) {
+        const task = tasks.find(t => t.id === draggedTaskId);
+        if (task) {
+            task.status = newStatus;
+            saveData();
+            renderAll();
+            showToast(`Task verschoben nach "${newStatus === 'todo' ? 'Todo' : newStatus === 'progress' ? 'In Arbeit' : 'Erledigt'}"`);
+        }
+        draggedTaskId = null;
+    }
+}
+
+// ============ PROJECT MODAL ============
+function openProjectModal(projectId = null) {
+    document.getElementById('projectModal').classList.add('show');
+    document.getElementById('projectForm').reset();
+    document.getElementById('projectId').value = '';
+    document.getElementById('projectModalTitle').textContent = 'Neues Projekt';
+    
+    if (projectId) {
+        const project = projects.find(p => p.id === projectId);
+        if (project) {
+            document.getElementById('projectId').value = project.id;
+            document.getElementById('projectTitle').value = project.title;
+            document.getElementById('projectDescription').value = project.description || '';
+            document.getElementById('projectModalTitle').textContent = 'Projekt bearbeiten';
+        }
+    }
+}
+
+function closeProjectModal() {
+    document.getElementById('projectModal').classList.remove('show');
+}
+
+document.getElementById('projectForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const id = document.getElementById('projectId').value;
+    const title = document.getElementById('projectTitle').value;
+    const description = document.getElementById('projectDescription').value;
+    
+    if (id) {
+        const project = projects.find(p => p.id === parseInt(id));
+        if (project) {
+            project.title = title;
+            project.description = description;
+            showToast('Projekt aktualisiert! ✅');
+        }
+    } else {
+        const newId = projects.length > 0 ? Math.max(...projects.map(p => p.id)) + 1 : 1;
+        projects.push({
+            id: newId,
+            title,
+            description,
+            created_at: new Date().toISOString().split('T')[0]
+        });
+        showToast('Projekt erstellt! 🎉');
+    }
+    
+    saveData();
+    closeProjectModal();
+    renderAll();
+});
+
+function editProject(id) {
+    openProjectModal(id);
+}
+
+function deleteProject(id) {
+    if (confirm('Möchtest du dieses Projekt wirklich löschen?')) {
+        projects = projects.filter(p => p.id !== id);
+        tasks = tasks.filter(t => t.project_id !== id);
+        saveData();
+        renderAll();
+        showToast('Projekt gelöscht');
+    }
+}
+
+// ============ TASK MODAL ============
+function openTaskModal(taskId = null) {
+    document.getElementById('taskModal').classList.add('show');
+    document.getElementById('taskForm').reset();
+    document.getElementById('taskId').value = '';
+    document.getElementById('taskModalTitle').textContent = 'Neuer Task';
+    
+    // Projekte laden
+    const projectSelect = document.getElementById('taskProject');
+    projectSelect.innerHTML = '<option value="">Projekt auswählen</option>' + 
+        projects.map(p => `<option value="${p.id}">${p.title}</option>`).join('');
+    
+    if (taskId) {
+        const task = tasks.find(t => t.id === taskId);
+        if (task) {
+            document.getElementById('taskId').value = task.id;
+            document.getElementById('taskTitle').value = task.title;
+            document.getElementById('taskDescription').value = task.description || '';
+            document.getElementById('taskProject').value = task.project_id;
+            document.getElementById('taskStatus').value = task.status;
+            document.getElementById('taskPriority').value = task.priority;
+            document.getElementById('taskDeadline').value = task.deadline || '';
+            document.getElementById('taskModalTitle').textContent = 'Task bearbeiten';
+        }
+    }
+}
+
+function closeTaskModal() {
+    document.getElementById('taskModal').classList.remove('show');
+}
+
+document.getElementById('taskForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const id = document.getElementById('taskId').value;
+    const title = document.getElementById('taskTitle').value;
+    const description = document.getElementById('taskDescription').value;
+    const project_id = parseInt(document.getElementById('taskProject').value);
+    const status = document.getElementById('taskStatus').value;
+    const priority = document.getElementById('taskPriority').value;
+    const deadline = document.getElementById('taskDeadline').value;
+    
+    if (id) {
+        const task = tasks.find(t => t.id === parseInt(id));
+        if (task) {
+            task.title = title;
+            task.description = description;
+            task.project_id = project_id;
+            task.status = status;
+            task.priority = priority;
+            task.deadline = deadline;
+            showToast('Task aktualisiert! ✅');
+        }
+    } else {
+        const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+        tasks.push({
+            id: newId,
+            title,
+            description,
+            project_id,
+            status,
+            priority,
+            deadline,
+            created_at: new Date().toISOString().split('T')[0]
+        });
+        showToast('Task erstellt! ');
+    }
+    
+    saveData();
+    closeTaskModal();
+    renderAll();
+});
+
+function editTask(id) {
+    openTaskModal(id);
+}
+
+function deleteTask(id) {
+    if (confirm('Möchtest du diesen Task wirklich löschen?')) {
+        tasks = tasks.filter(t => t.id !== id);
+        saveData();
+        renderAll();
+        showToast('Task gelöscht');
+    }
+}
+
+// ============ PROFILE ============
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const username = document.getElementById('profileUsername').value;
+    const email = document.getElementById('profileEmailInput').value;
+    
+    currentUser.username = username;
+    currentUser.email = email;
+    localStorage.setItem('stm_user', JSON.stringify(currentUser));
+    updateUserInfo();
+    showToast('Profil aktualisiert! ✅');
+});
+
+// ============ TOAST ============
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ============ INIT ============
+initDemoData();
+
+// Prüfen ob bereits eingeloggt
+const savedUser = localStorage.getItem('stm_user');
+if (savedUser) {
+    currentUser = JSON.parse(savedUser);
+    showApp();
+}
+</script>
+
+</body>
+</html>
