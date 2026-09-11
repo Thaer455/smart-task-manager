@@ -42,7 +42,7 @@ function priorityBadge($priority)
             return '<span class="badge bg-danger">🔴 Hoch</span>';
 
         case "medium":
-            return '<span class="badge bg-warning text-dark">🟡 Mittel</span>';
+            return '<span class="badge bg-warning text-dark"> Mittel</span>';
 
         case "low":
         default:
@@ -200,7 +200,7 @@ function deadlineBadge($deadline, $status)
 
                                     <div class="small mb-2">
 
-                                        📁
+                                        
 
                                         <strong>Projekt:</strong>
 
@@ -266,13 +266,13 @@ function deadlineBadge($deadline, $status)
 
 
                         <?php if (empty($todoTasks)): ?>
-
-                            <p class="text-muted text-center">
-
-                                Keine Tasks
-
-                            </p>
-
+                            <div class="text-center py-4">
+                                <i class="bi bi-circle" style="font-size: 2.5rem; color: var(--text-muted); opacity: 0.3; display: block; margin-bottom: 10px;"></i>
+                                <p class="text-muted mb-3">Keine offenen Tasks</p>
+                                <a href="create.php" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-plus-lg"></i> Ersten Task erstellen
+                                </a>
+                            </div>
                         <?php endif; ?>
 
                     </div>
@@ -361,7 +361,7 @@ function deadlineBadge($deadline, $status)
 
                                     <div class="small mb-2">
 
-                                        👤
+                                        
 
                                         <strong>Zugewiesen:</strong>
 
@@ -412,13 +412,10 @@ function deadlineBadge($deadline, $status)
 
 
                         <?php if (empty($progressTasks)): ?>
-
-                            <p class="text-muted text-center">
-
-                                Keine Tasks
-
-                            </p>
-
+                            <div class="text-center py-4">
+                                <i class="bi bi-hourglass-split" style="font-size: 2.5rem; color: var(--text-muted); opacity: 0.3; display: block; margin-bottom: 10px;"></i>
+                                <p class="text-muted mb-0">Keine Tasks in Bearbeitung</p>
+                            </div>
                         <?php endif; ?>
 
                     </div>
@@ -558,13 +555,11 @@ function deadlineBadge($deadline, $status)
 
 
                         <?php if (empty($doneTasks)): ?>
-
-                            <p class="text-muted text-center">
-
-                                Keine Tasks
-
-                            </p>
-
+                            <div class="text-center py-4">
+                                <i class="bi bi-check-circle" style="font-size: 2.5rem; color: var(--text-muted); opacity: 0.3; display: block; margin-bottom: 10px;"></i>
+                                <p class="text-muted mb-2">Noch nichts erledigt</p>
+                                <small class="text-muted">Du schaffst das! 💪</small>
+                            </div>
                         <?php endif; ?>
 
                     </div>
